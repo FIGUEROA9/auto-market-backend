@@ -8,10 +8,11 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+    @Column(nullable = false, length = 100)
     private String nombre;
     private String email;
-    private String contrasena;
+    private String password;
     private String tipoUsuario;
     private String telefono;
     private String whatsapp;
@@ -22,11 +23,11 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(Integer id, String nombre, String email, String contrasena, String tipoUsuario, String telefono, String whatsapp, Boolean verificadoEmail, Boolean verificadoTelefono) {
+    public Usuario(Long id, String nombre, String email, String password, String tipoUsuario, String telefono, String whatsapp, Boolean verificadoEmail, Boolean verificadoTelefono) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
-        this.contrasena = contrasena;
+        this.password = password;
         this.tipoUsuario = tipoUsuario;
         this.telefono = telefono;
         this.whatsapp = whatsapp;
@@ -34,11 +35,11 @@ public class Usuario {
         this.verificadoTelefono = verificadoTelefono;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -60,12 +61,12 @@ public class Usuario {
     }
 
 
-    public String getContrasena() {
-        return contrasena;
+    public String getPassword() {
+        return password;
     }
 
-    public void setContrasena(String contrasena) {
-        this.contrasena = contrasena;
+    public void setPassword(String contrasena) {
+        this.password = password;
     }
 
 

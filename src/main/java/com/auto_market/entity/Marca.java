@@ -1,38 +1,23 @@
 package com.auto_market.entity;
 
+import com.auto_market.entity.Vehiculo;
 import jakarta.persistence.*;
+import lombok.*;
+import java.util.List;
 
 @Entity
 @Table(name = "marcas")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Marca {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     private String nombre;
 
-    public Marca() {
-    }
-
-    public Marca(Integer id, String nombre) {
-        this.id = id;
-        this.nombre = nombre;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+    @OneToMany(mappedBy = "marca")
+    private List<Vehiculo> vehiculos;
 }

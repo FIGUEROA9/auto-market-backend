@@ -2,22 +2,22 @@ package com.auto_market.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.List;
 
 @Entity
-@Table(name = "categorias_vehiculo")
+@Table(name = "vehiculo_imagenes")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CategoriaVehiculo {
+public class VehiculoImagen {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String nombre;
+    private String url;
 
-    @OneToMany(mappedBy = "categoria")
-    private List<Vehiculo> vehiculos;
+    @ManyToOne
+    @JoinColumn(name = "vehiculo_id")
+    private Vehiculo vehiculo;
 }
