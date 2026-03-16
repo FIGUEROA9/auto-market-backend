@@ -1,6 +1,14 @@
 package com.auto_market.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Past;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "usuarios")
@@ -10,8 +18,15 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, length = 100)
+
+    @NotBlank(message = "El nombre es Obligatorio")
     private String nombre;
+
+    @Email(message = "Ingresar email valido")
+    @NotBlank(message = "El email es obligatorio")
     private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
     private String tipoUsuario;
     private String telefono;
@@ -20,10 +35,28 @@ public class Usuario {
     private Boolean verificadoTelefono;
 
 
+    @ManyToOne
+    @JoinColumn(name = "tipo_documento_id", nullable = false)
+    @NotBlank(message = "Campo obligatorio")
+    @JsonBackReference
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private TipoDocumento tipoDocumento;
+
+    @Past(message = "ingrese fecha valida")
+    @NotBlank(message = "Campo obligatorio")
+    private LocalDate fechaExpedicion;
+
+    @Past(message = "ingresa fecha valida")
+    @NotBlank(message = "Campo obligatorio")
+    private LocalDate fechaNacimiento;
+
+
+
     public Usuario() {
     }
 
-    public Usuario(Long id, String nombre, String email, String password, String tipoUsuario, String telefono, String whatsapp, Boolean verificadoEmail, Boolean verificadoTelefono) {
+    public Usuario(Long id, String nombre, String email, String password, String tipoUsuario, String telefono, String whatsapp, Boolean verificadoEmail, Boolean verificadoTelefono, TipoDocumento tipoDocumento, LocalDate fechaExpedicion, LocalDate fechaNacimiento) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
@@ -33,6 +66,9 @@ public class Usuario {
         this.whatsapp = whatsapp;
         this.verificadoEmail = verificadoEmail;
         this.verificadoTelefono = verificadoTelefono;
+        this.tipoDocumento = tipoDocumento;
+        this.fechaExpedicion = fechaExpedicion;
+        this.fechaNacimiento = fechaNacimiento;
     }
 
     public Long getId() {
@@ -114,4 +150,27 @@ public class Usuario {
         this.verificadoTelefono = verificadoTelefono;
     }
 
+    public TipoDocumento getTipoDocumento() {
+        return tipoDocumento;
+    }
+
+    public void setTipoDocumento(TipoDocumento tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public LocalDate getFechaExpedicion() {
+        return fechaExpedicion;
+    }
+
+    public void setFechaExpedicion(LocalDate fechaExpedicion) {
+        this.fechaExpedicion = fechaExpedicion;
+    }
+
+    public LocalDate getFechaNacimiento() {
+        return fechaNacimiento;
+    }
+
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
+        this.fechaNacimiento = fechaNacimiento;
+    }
 }
