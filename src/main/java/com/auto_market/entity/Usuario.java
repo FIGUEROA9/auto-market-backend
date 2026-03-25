@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -37,7 +38,7 @@ public class Usuario {
 
     @ManyToOne
     @JoinColumn(name = "tipo_documento_id", nullable = false)
-    @NotBlank(message = "Campo obligatorio")
+    @NotNull(message = "Campo obligatorio")
     @JsonBackReference
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

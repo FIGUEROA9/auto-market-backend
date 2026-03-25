@@ -17,6 +17,7 @@ public class Calificacion {
 
     private Integer puntuacion;
 
+
     private String comentario;
 
     @ManyToOne
