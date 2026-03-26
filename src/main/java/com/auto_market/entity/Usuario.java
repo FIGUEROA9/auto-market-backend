@@ -18,8 +18,9 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, length = 100)
 
+
+    @Column(nullable = false, length = 100)
     @NotBlank(message = "El nombre es Obligatorio")
     private String nombre;
 
@@ -44,12 +45,12 @@ public class Usuario {
     @EqualsAndHashCode.Exclude
     private TipoDocumento tipoDocumento;
 
-    @Past(message = "ingrese fecha valida")
-    @NotBlank(message = "Campo obligatorio")
+    @NotNull(message = "Campo obligatorio")
+    @Past(message = "Ingrese fecha válida")
     private LocalDate fechaExpedicion;
 
-    @Past(message = "ingresa fecha valida")
-    @NotBlank(message = "Campo obligatorio")
+    @NotNull(message = "Campo obligatorio")
+    @Past(message = "Ingrese fecha válida")
     private LocalDate fechaNacimiento;
 
 
