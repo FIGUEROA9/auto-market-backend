@@ -1,10 +1,11 @@
 package com.auto_market.repository;
 
+import com.auto_market.entity.CategoriaVehiculo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import com.auto_market.entity.Usuario;
+
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface CategoriaVehiculoRepository extends JpaRepository<CategoriaVehiculo, Long> {
 
 }
