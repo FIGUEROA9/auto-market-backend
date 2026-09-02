@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="AutoMarket">
+  <rect width="32" height="32" rx="8" fill="#0b0b0c"/>
+  <path fill="#c8ccd4" d="M8 12.5h16l3.2 6.2H4.8z"/>
+  <path fill="#c8ccd4" d="M4.8 18.7h22.4V23c0 1-.8 1.8-1.8 1.8H6.6c-1 0-1.8-.8-1.8-1.8z"/>
+  <rect x="7" y="15.6" width="6.4" height="3.2" rx="0.6" fill="#f2f1ee"/>
+  <rect x="18.6" y="15.6" width="6.4" height="3.2" rx="0.6" fill="#f2f1ee"/>
+</svg>

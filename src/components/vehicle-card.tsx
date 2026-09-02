@@ -1,0 +1,57 @@
+import { Link } from "@tanstack/react-router";
+import { Gauge, MapPin } from "lucide-react";
+import type { Vehicle } from "@/lib/market";
+import { BODY_LABEL, LISTING_LABEL, formatCop, formatKm } from "@/lib/format";
+import { Badge } from "@/components/ui/badge";
+
+export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
+  const listingTone =
+    vehicle.listingType === "permuta"
+      ? "warn"
+      : vehicle.listingType === "ambos"
+        ? "accent"
+        : "success";
+
+  return (
+    <Link
+      to="/vehiculo/$id"
+      params={{ id: String(vehicle.id) }}
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-muted"
+    >
+      <div className="relative aspect-16/9 overflow-hidden bg-elevated">
+        <img
+          src={vehicle.imageUrl}
+          alt={vehicle.title}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+        />
+        <div className="absolute left-3 top-3">
+          <Badge tone={listingTone}>{LISTING_LABEL[vehicle.listingType]}</Badge>
+        </div>
+      </div>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-subtle">
+            {vehicle.brand} · {vehicle.year}
+          </p>
+          <h3 className="mt-1 font-display text-lg font-semibold leading-snug text-fg">
+            {vehicle.title}
+          </h3>
+        </div>
+        <p className="font-display text-xl font-semibold tabular-nums text-fg">
+          {formatCop(vehicle.price)}
+        </p>
+        <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted">
+          <span className="inline-flex items-center gap-1">
+            <Gauge className="size-3.5" />
+            {formatKm(vehicle.mileage)}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="size-3.5" />
+            {vehicle.city}
+          </span>
+          <span>{BODY_LABEL[vehicle.bodyType] ?? vehicle.bodyType}</span>
+        </div>
+      </div>
+    </Link>
+  );
+}

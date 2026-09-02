@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "AutoMarket",
+      "hasCanvas": false,
+      "bodyTextLen": 1304,
+      "bodyTextHash": "59fc86768ab8bdb92f746d3ba7c88e5a35e174a5fcad2d36ca8aa8022b303efe",
+      "bodyTextPrefix": "AutoMarket Catálogo Contacto Publicar MARKETPLACE DE VEHÍCULOS C",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "AutoMarket",
+      "hasCanvas": false,
+      "bodyTextLen": 1277,
+      "bodyTextHash": "87dd3fb5c322a8871d1039e745a60bb5b58fb4fccce94423153d35f8bd33c5ff",
+      "bodyTextPrefix": "AutoMarket MARKETPLACE DE VEHÍCULOS Compra, vende o permuta. Sin",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/catalogo",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "AutoMarket",
+      "hasCanvas": false,
+      "bodyTextLen": 1483,
+      "bodyTextHash": "05772539548f61974fa3864f23783f0a5d4c2b7c36cac52b7b660c0d1476102a",
+      "bodyTextPrefix": "AutoMarket Catálogo Contacto Publicar INVENTARIO Catálogo Venta ",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/catalogo.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "AutoMarket",
+      "hasCanvas": false,
+      "bodyTextLen": 1456,
+      "bodyTextHash": "d869d8e0b9b8736a179f94ef3dc0a472336800dd97197ca189bf418d7eaccea0",
+      "bodyTextPrefix": "AutoMarket INVENTARIO Catálogo Venta directa y permuta. Filtra y",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/catalogo-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/catalogo.json"
+}
