@@ -13,7 +13,7 @@ export const Route = createFileRoute("/mis-anuncios")({ component: MisAnuncios }
 
 function toneFor(status: string) {
   if (status === "activo") return "success" as const;
-  if (status === "pausado") return "warn" as const;
+  if (status === "pausado" || status === "pendiente_revision") return "warn" as const;
   if (status === "vendido") return "accent" as const;
   return "danger" as const;
 }
@@ -76,12 +76,17 @@ function MisAnuncios() {
                   </Link>
                   <p className="mt-1 text-sm tabular-nums text-muted">{formatCop(v.price)}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge tone={toneFor(v.status)}>{STATUS_LABEL[v.status]}</Badge>
+                    <Badge tone={toneFor(v.status)}>{STATUS_LABEL[v.status] ?? v.status}</Badge>
                     <Badge>{LISTING_LABEL[v.listingType]}</Badge>
                   </div>
+                  {v.status === "pendiente_revision" && (
+                    <p className="mt-2 text-xs text-muted">
+                      En revisión. Si verificas tu cuenta, los siguientes anuncios salen de inmediato.
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {v.status !== "activo" && (
+                  {v.status === "pausado" && (
                     <Button size="sm" variant="secondary" onClick={() => void updateVehicleStatus({ data: { id: v.id, status: "activo" } }).then(reload)}>
                       Activar
                     </Button>
@@ -91,7 +96,7 @@ function MisAnuncios() {
                       Pausar
                     </Button>
                   )}
-                  {v.status !== "vendido" && (
+                  {v.status !== "vendido" && v.status !== "pendiente_revision" && v.status !== "rechazado" && (
                     <Button size="sm" variant="outline" onClick={() => void updateVehicleStatus({ data: { id: v.id, status: "vendido" } }).then(reload)}>
                       Vendido
                     </Button>

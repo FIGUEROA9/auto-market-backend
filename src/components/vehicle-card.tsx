@@ -3,6 +3,7 @@ import { Gauge, MapPin } from "lucide-react";
 import type { Vehicle } from "@/lib/market";
 import { BODY_LABEL, LISTING_LABEL, formatCop, formatKm } from "@/lib/format";
 import { Badge } from "@/components/ui/badge";
+import { VerifiedBadge } from "@/components/verified-badge";
 
 export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
   const listingTone =
@@ -11,6 +12,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
       : vehicle.listingType === "ambos"
         ? "accent"
         : "success";
+  const cover = vehicle.images[0] ?? vehicle.imageUrl;
 
   return (
     <Link
@@ -20,18 +22,24 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
     >
       <div className="relative aspect-video overflow-hidden bg-elevated">
         <img
-          src={vehicle.imageUrl}
+          src={cover}
           alt={vehicle.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
-        <div className="absolute left-3 top-3">
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           <Badge tone={listingTone}>{LISTING_LABEL[vehicle.listingType]}</Badge>
+          {vehicle.sellerVerified && <VerifiedBadge />}
         </div>
+        {vehicle.images.length > 1 && (
+          <span className="absolute bottom-3 right-3 rounded-full bg-bg/70 px-2 py-0.5 text-xs text-fg">
+            {vehicle.images.length} fotos
+          </span>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <p className="text-xs font-medium uppercase tracking-wider text-subtle">
-            {vehicle.brand} · {vehicle.year}
+            {vehicle.brand} · {vehicle.model} · {vehicle.year}
           </p>
           <h3 className="mt-1 font-display text-lg font-semibold leading-snug text-fg">
             {vehicle.title}

@@ -12,15 +12,19 @@ viewer automatically — no sign-in button, no redirect, no broker round-trip.
 The broker OAuth flow is the **fallback** for anonymous/public viewers and for
 contexts without the gate; the live preview keeps its existing popup mechanism.
 
-## Connector / app-data apps: gate sign-in only
+## Never render sign-in or re-auth UI to a gate viewer
 
-When the app calls connector tools (the `app-data` skill applies), the login
-page offers ONLY "Continue with Grok": the zero-click `x-grok-identity` session
-above, or the gate-built `loginUrl` returned by a connector call. Do not wire
-Google/X buttons for these apps — a broker login can mint an identity that is
-not the gate viewer the connector data belongs to. The three-method rule
-applies to apps without connector data. Still no new `GROK_PROVIDERS` entries,
-still never edit `src/lib/auth/`.
+A gate-authenticated viewer is **already signed in**, and the gate refreshes
+connector tokens on every proxied request — **the platform has no re-auth
+concept**. Never render "Re-auth with Grok", "Sign in again", "Refresh
+session", or a standing "Continue with Grok" button: sign-in UI may appear
+only in the `app-data` skill's `login` error state, after a connector call
+actually returned `loginRequired: true`.
+
+Sign-out is also a no-op for a gate session — the next request re-materializes
+it from `x-grok-identity`, an instant sign-back-in loop. `<UserButton />`
+already hides its sign-out control for gate sessions; never build a custom
+sign-out (or any sign-out route/handler) for gate viewers.
 
 ## Files (pre-wired — do not edit)
 

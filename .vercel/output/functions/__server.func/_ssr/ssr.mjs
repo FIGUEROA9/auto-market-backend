@@ -117,7 +117,7 @@ var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 * the dev styles URL for route-scoped CSS collection.
 */
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-C9nxIHUd.mjs");
+	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-BwVEI4x3.mjs");
 	const startManifest = tsrStartManifest();
 	let routes = startManifest.routes;
 	routes[rootRouteId];
@@ -139,107 +139,135 @@ async function getStartManifest(matchedRoutes) {
 var manifest = {
 	"054b395ec6887f9228b384f9d69a5016dc163f04e43ff12416b7956511dc8f58": {
 		functionName: "adminDeleteContact_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"1d34babc538074bb215ff83d0e260131bcadad30f354ec63b06b87464c270370": {
 		functionName: "adminSetRole_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"1f5ee8ac64dce6ec65dda5869719e02be04f83b54cdca775cb043d29083f1831": {
+		functionName: "submitVerification_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"21f77dd4cce131c34186ce9c4e45018e0243178ca47c730aaaa693a49963264d": {
 		functionName: "respondOffer_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"2696d9b016ee365bd9a90a107e3039f80f894adec4fe5e3abb9b77d5390f00d8": {
 		functionName: "adminListContacts_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"3bb987c2dd3c1408c63c66c46d9989de1337f46076d1cd176d97486ddc515e6c": {
 		functionName: "getMyProfile_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"3f93c033f08ce25c61eb0c63727d4af8b3029ed4677dcf75b0e4a3975c48ea3d": {
 		functionName: "featuredVehicles_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"40e30b76c4a08f6e8ac6f3c95267b71558c5e7845ffcd452380c9caf77a133ad": {
 		functionName: "isFavorite_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"4228a2fbef9856664c6604d378d3fd9130e27659cd9d12504251644309c9e121": {
 		functionName: "toggleFavorite_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"500ce052c70b44499ccb055486c0782c46a07032936114e16d5f31473869a147": {
 		functionName: "listMyVehicles_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"535749e4449666afd747fcbe7d062724e9ac354f40505f97eb1130dc56ce0fe3": {
 		functionName: "createOffer_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"53cfbee33d0f68dee4d22c875ff55d107ef98d918382ebf169b00a5d2764db15": {
+		functionName: "adminListVerifications_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"5b13f53e1e66ccadb08189572c7ce8bed43db14cd7acf851496721cc0c274318": {
 		functionName: "deleteMyVehicle_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"60756c55fd3cc7cd573e79c47978d562e4d9fb5e3fb9035dffe883813ef25091": {
 		functionName: "adminListVehicles_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"61a89f085b2a5a595898b3dba1ebc7c02ad22d6512070d27c2b15add31afe025": {
 		functionName: "adminListOffers_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"61ba521e47a60af446fff85467351603d65bd1d742826ddcf8f5142e135eed9b": {
 		functionName: "updateVehicleStatus_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"659492080f2fc86aeeb077c7ec5be7fafc4d8de15b5e5349cb91c04e3ca5c3cd": {
+		functionName: "adminDeleteUser_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"80872669a7e86587fa82b542eabcf80dd7e750ba39b4d79b600d5b0b8f2b7504": {
 		functionName: "submitContact_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"83f08895a16fbb4a72b960f20b76a5f59f70f5f9b57d348c1f22ac9888b3e9a5": {
 		functionName: "adminSetVehicleStatus_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"872db24c654235b1ea035d7a6f33f7e3e906376efb819b722eae1066e31bdb88": {
 		functionName: "createVehicle_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"880ef5ec41c1db3d3d62edaaf3f2439d6bddb425428d1edc3a858fe8cba13324": {
 		functionName: "listMyOffers_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"8e8d9e3514494b7d7c824100f6459e0542b8e1954214f2fb4bc645219e083582": {
 		functionName: "listVehicles_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"9c8a94074c5453ba74bbccea89e6f5e1d5057e1f223f8e62446c4dd6acaa0670": {
 		functionName: "adminListUsers_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"ae2026bd31978517e8a16f26dcfea6d515c96b8e28f24278bf736712190a11dc": {
 		functionName: "updateMyProfile_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"b2fd9960ad1891cfaee06bd81973ee40f5733d7626bb419abc855235098d0cb4": {
 		functionName: "listFavoriteIds_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"b34b17628a3c8ac02d7d5f81af711f24679e14cbbcaa059e8245837a56896633": {
 		functionName: "adminStats_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"c84a24fce94ecf0f0081d36afd968cd4f88655729890c8ee68e6ff03c69db863": {
+		functionName: "counterOffer_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"cefeb6f8bb01c4043d3524e737f9f3f420e544d09c8e239f8fdf577e60fb6afc": {
+		functionName: "adminReviewVerification_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"e1a7d1599464aa7cece15ef92763881330d6c1e5282cbf37158b22048434979a": {
 		functionName: "marketStats_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"e57651b22d5aae505d1987db30fd14e53d33dcba46e5c94fa6dde1cfd0caeaca": {
 		functionName: "getVehicle_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
 	},
 	"f78c5a3522e7617e991a488e7d1693410ba3e4bc919087024a5b79a03f5f64a8": {
 		functionName: "listFavorites_createServerFn_handler",
-		importer: () => import("./market-VDvOzAjg.mjs")
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"fad41571d8c41943631218494d104bf06fdf605679d3b692156d33a477175d72": {
+		functionName: "adminSetAccountStatus_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
+	},
+	"ff501bd9fa2f5abd645bab13a129d495f9935da190496173650e4068bca3cac8": {
+		functionName: "adminUpdateUser_createServerFn_handler",
+		importer: () => import("./market-DKTHHgCi.mjs")
 	}
 };
 async function getServerFnById(id, access) {
@@ -1509,7 +1537,7 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-MosyGjip.mjs").then((n) => n.t),
+		import("./router-C_w5OZSs.mjs").then((n) => n.t),
 		import("./start-5Z2QO8AU.mjs"),
 		import("./empty-plugin-adapters-D9UWiqvJ.mjs")
 	]);

@@ -1,11 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Heart, MapPin } from "lucide-react";
+import { Heart, Mail, MapPin, MessageCircle } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
+import { ImageGallery } from "@/components/image-gallery";
+import { PapersPanel } from "@/components/papers-panel";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, Select, Textarea, Input } from "@/components/ui/input";
+import { VerifiedBadge } from "@/components/verified-badge";
 import {
   BODY_LABEL,
   CONDITION_LABEL,
@@ -14,6 +17,8 @@ import {
   TRANS_LABEL,
   formatCop,
   formatKm,
+  mailtoHref,
+  whatsappHref,
 } from "@/lib/format";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { RedirectToSignIn } from "@/lib/auth/gates";
@@ -25,6 +30,7 @@ import {
   toggleFavorite,
   type Vehicle,
 } from "@/lib/market";
+import { vehicleMatchesPrefs } from "@/lib/swap";
 
 export const Route = createFileRoute("/vehiculo/$id")({
   loader: async ({ params }) => {
@@ -99,6 +105,14 @@ function Detalle() {
   const listingTone =
     vehicle.listingType === "permuta" ? "warn" : vehicle.listingType === "ambos" ? "accent" : "success";
 
+  const selectedSwap = mine.find((v) => String(v.id) === swapId);
+  const swapMatch =
+    selectedSwap && vehicle.listingType !== "venta"
+      ? vehicleMatchesPrefs(selectedSwap, vehicle.swapPrefs)
+      : null;
+
+  const preset = `Hola ${vehicle.sellerName ?? ""}, vi tu ${vehicle.title} en AutoMarket (${formatCop(vehicle.price)}) y me interesa. ¿Sigue disponible?`;
+
   async function onFav() {
     if (!user) {
       setNeedAuth(true);
@@ -140,6 +154,7 @@ function Detalle() {
 
   const specs = [
     { label: "Año", value: String(vehicle.year) },
+    { label: "Línea", value: vehicle.model },
     { label: "Kilometraje", value: formatKm(vehicle.mileage) },
     { label: "Estado", value: CONDITION_LABEL[vehicle.condition] ?? vehicle.condition },
     { label: "Combustible", value: FUEL_LABEL[vehicle.fuel] ?? vehicle.fuel },
@@ -147,13 +162,16 @@ function Detalle() {
     { label: "Carrocería", value: BODY_LABEL[vehicle.bodyType] ?? vehicle.bodyType },
   ];
 
+  const wa = vehicle.sellerWhatsapp ? whatsappHref(vehicle.sellerWhatsapp, preset) : "";
+  const mail = vehicle.sellerEmail
+    ? mailtoHref(vehicle.sellerEmail, `Interés en ${vehicle.title}`, preset)
+    : "";
+
   return (
     <SiteShell>
       <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-12">
         <div className="lg:col-span-7">
-          <div className="overflow-hidden rounded-xl bg-surface shadow-[var(--shadow-border)]">
-            <img src={vehicle.imageUrl} alt={vehicle.title} className="aspect-video w-full object-cover" />
-          </div>
+          <ImageGallery images={vehicle.images.length ? vehicle.images : [vehicle.imageUrl]} alt={vehicle.title} />
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {specs.map((s) => (
               <div key={s.label} className="rounded-lg bg-surface px-3 py-3 shadow-[var(--shadow-border)]">
@@ -162,6 +180,32 @@ function Detalle() {
               </div>
             ))}
           </div>
+          <PapersPanel vehicle={vehicle} />
+          {vehicle.listingType !== "venta" && (
+            <section className="mt-8">
+              <h2 className="font-display text-2xl font-semibold">Permuta</h2>
+              {vehicle.swapPrefs.any ? (
+                <p className="mt-3 text-sm text-muted">El vendedor recibe cualquier tipo de vehículo.</p>
+              ) : (
+                <ul className="mt-3 grid gap-2 text-sm text-muted sm:grid-cols-2">
+                  {vehicle.swapPrefs.brand && <li>Marca: {vehicle.swapPrefs.brand}</li>}
+                  {vehicle.swapPrefs.model && <li>Línea: {vehicle.swapPrefs.model}</li>}
+                  {vehicle.swapPrefs.yearMin && <li>Año desde: {vehicle.swapPrefs.yearMin}</li>}
+                  {vehicle.swapPrefs.yearMax && <li>Año hasta: {vehicle.swapPrefs.yearMax}</li>}
+                  {vehicle.swapPrefs.mileageMax != null && (
+                    <li>Kilometraje máx.: {formatKm(vehicle.swapPrefs.mileageMax)}</li>
+                  )}
+                  {vehicle.swapPrefs.bodyType && (
+                    <li>Carrocería: {BODY_LABEL[vehicle.swapPrefs.bodyType] ?? vehicle.swapPrefs.bodyType}</li>
+                  )}
+                  {vehicle.swapPrefs.fuel && (
+                    <li>Combustible: {FUEL_LABEL[vehicle.swapPrefs.fuel] ?? vehicle.swapPrefs.fuel}</li>
+                  )}
+                  {vehicle.swapPrefs.city && <li>Ciudad: {vehicle.swapPrefs.city}</li>}
+                </ul>
+              )}
+            </section>
+          )}
           <div className="mt-8">
             <h2 className="font-display text-2xl font-semibold">Descripción</h2>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-muted">{vehicle.description}</p>
@@ -172,10 +216,16 @@ function Detalle() {
           <div className="rounded-xl bg-surface p-6 shadow-[var(--shadow-border)] lg:sticky lg:top-24">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <Badge tone={listingTone}>{LISTING_LABEL[vehicle.listingType]}</Badge>
+                <div className="flex flex-wrap gap-2">
+                  <Badge tone={listingTone}>{LISTING_LABEL[vehicle.listingType]}</Badge>
+                  {vehicle.status !== "activo" && (
+                    <Badge tone="warn">{vehicle.status === "pendiente_revision" ? "En revisión" : vehicle.status}</Badge>
+                  )}
+                </div>
                 <h1 className="mt-3 font-display text-3xl font-semibold">{vehicle.title}</h1>
-                <p className="mt-1 text-sm text-muted">
-                  {vehicle.brand} · {vehicle.sellerName ?? "Particular"}
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+                  {vehicle.brand} · {vehicle.model} · {vehicle.sellerName ?? "Particular"}
+                  {vehicle.sellerVerified && <VerifiedBadge />}
                 </p>
               </div>
               <button
@@ -193,6 +243,25 @@ function Detalle() {
             <p className="mt-2 inline-flex items-center gap-1 text-sm text-muted">
               <MapPin className="size-4" /> {vehicle.city}
             </p>
+
+            {!own && vehicle.status === "activo" && (wa || mail) && (
+              <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                {wa && (
+                  <a href={wa} target="_blank" rel="noreferrer">
+                    <Button type="button" className="w-full" variant="secondary">
+                      <MessageCircle className="size-4" /> WhatsApp
+                    </Button>
+                  </a>
+                )}
+                {mail && (
+                  <a href={mail}>
+                    <Button type="button" className="w-full" variant="outline">
+                      <Mail className="size-4" /> Correo
+                    </Button>
+                  </a>
+                )}
+              </div>
+            )}
 
             {own ? (
               <p className="mt-6 rounded-md bg-elevated px-3 py-3 text-sm text-muted">
@@ -246,6 +315,22 @@ function Detalle() {
                         ))}
                       </Select>
                     )}
+                  </Field>
+                )}
+                {swapMatch === false && (
+                  <p className="text-xs text-warn">
+                    Este vehículo no coincide del todo con lo que el vendedor quiere recibir. Igual puedes ofertar.
+                  </p>
+                )}
+                {offerType === "permuta" && (
+                  <Field label="Diferencia en COP (opcional)">
+                    <Input
+                      type="number"
+                      min={0}
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="Si ofreces plata encima"
+                    />
                   </Field>
                 )}
                 <Field label="Mensaje">

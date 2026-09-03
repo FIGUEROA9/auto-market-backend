@@ -25,6 +25,7 @@ import { Route as AdminAnunciosRouteImport } from './routes/admin/anuncios'
 import { Route as AdminContactosRouteImport } from './routes/admin/contactos'
 import { Route as AdminOfertasRouteImport } from './routes/admin/ofertas'
 import { Route as AdminUsuariosRouteImport } from './routes/admin/usuarios'
+import { Route as AdminVerificacionesRouteImport } from './routes/admin/verificaciones'
 import { Route as VehiculoIdRouteImport } from './routes/vehiculo.$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -108,6 +109,11 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminVerificacionesRoute = AdminVerificacionesRouteImport.update({
+  id: '/verificaciones',
+  path: '/verificaciones',
+  getParentRoute: () => AdminRoute,
+} as any)
 const VehiculoIdRoute = VehiculoIdRouteImport.update({
   id: '/vehiculo/$id',
   path: '/vehiculo/$id',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/admin/contactos': typeof AdminContactosRoute
   '/admin/ofertas': typeof AdminOfertasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/verificaciones': typeof AdminVerificacionesRoute
   '/vehiculo/$id': typeof VehiculoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -154,6 +161,7 @@ export interface FileRoutesByTo {
   '/admin/contactos': typeof AdminContactosRoute
   '/admin/ofertas': typeof AdminOfertasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/verificaciones': typeof AdminVerificacionesRoute
   '/vehiculo/$id': typeof VehiculoIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/admin/contactos': typeof AdminContactosRoute
   '/admin/ofertas': typeof AdminOfertasRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
+  '/admin/verificaciones': typeof AdminVerificacionesRoute
   '/vehiculo/$id': typeof VehiculoIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/admin/contactos'
     | '/admin/ofertas'
     | '/admin/usuarios'
+    | '/admin/verificaciones'
     | '/vehiculo/$id'
     | '/admin/'
     | '/api/auth/$'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/admin/contactos'
     | '/admin/ofertas'
     | '/admin/usuarios'
+    | '/admin/verificaciones'
     | '/vehiculo/$id'
     | '/admin'
     | '/api/auth/$'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/admin/contactos'
     | '/admin/ofertas'
     | '/admin/usuarios'
+    | '/admin/verificaciones'
     | '/vehiculo/$id'
     | '/admin/'
     | '/api/auth/$'
@@ -371,6 +383,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/verificaciones': {
+      id: '/admin/verificaciones'
+      path: '/verificaciones'
+      fullPath: '/admin/verificaciones'
+      preLoaderRoute: typeof AdminVerificacionesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/vehiculo/$id': {
       id: '/vehiculo/$id'
       path: '/vehiculo/$id'
@@ -393,6 +412,7 @@ interface AdminRouteChildren {
   AdminContactosRoute: typeof AdminContactosRoute
   AdminOfertasRoute: typeof AdminOfertasRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
+  AdminVerificacionesRoute: typeof AdminVerificacionesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
@@ -401,6 +421,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminContactosRoute: AdminContactosRoute,
   AdminOfertasRoute: AdminOfertasRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
+  AdminVerificacionesRoute: AdminVerificacionesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 

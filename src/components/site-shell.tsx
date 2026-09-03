@@ -118,6 +118,15 @@ export function SiteHeader() {
             >
               Favoritos
             </Link>
+            <Link
+              to="/perfil"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname.startsWith("/perfil") ? "text-fg" : "text-muted hover:text-fg",
+              )}
+            >
+              Perfil
+            </Link>
           </SignedIn>
           <Link to="/publicar">
             <Button size="sm" variant="secondary">

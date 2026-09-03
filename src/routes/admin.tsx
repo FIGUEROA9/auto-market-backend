@@ -1,5 +1,5 @@
 import { Link, Outlet, createFileRoute, useRouterState } from "@tanstack/react-router";
-import { ClipboardList, LayoutDashboard, Mail, Megaphone, Users } from "lucide-react";
+import { ClipboardList, LayoutDashboard, Mail, Megaphone, ShieldCheck, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { RedirectToSignIn, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -11,6 +11,7 @@ export const Route = createFileRoute("/admin")({ component: AdminLayout });
 const NAV = [
   { to: "/admin", label: "Inicio", icon: LayoutDashboard, exact: true },
   { to: "/admin/usuarios", label: "Usuarios", icon: Users },
+  { to: "/admin/verificaciones", label: "Verificaciones", icon: ShieldCheck },
   { to: "/admin/anuncios", label: "Anuncios", icon: Megaphone },
   { to: "/admin/ofertas", label: "Ofertas", icon: ClipboardList },
   { to: "/admin/contactos", label: "Contactos", icon: Mail },
@@ -91,6 +92,9 @@ function AdminLayout() {
               </Link>
             ))}
           </div>
+          <Link to="/" className="hidden text-sm text-muted hover:text-fg md:inline">
+            Ver sitio
+          </Link>
           <div className="ml-auto">
             <UserButton />
           </div>

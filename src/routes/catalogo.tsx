@@ -22,6 +22,7 @@ function Catalogo() {
   const [fuel, setFuel] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [items, setItems] = useState<Vehicle[]>(initial);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +39,7 @@ function Catalogo() {
           fuel: fuel || undefined,
           minPrice: minPrice ? Number(minPrice) : undefined,
           maxPrice: maxPrice ? Number(maxPrice) : undefined,
+          verifiedOnly: verifiedOnly || undefined,
         },
       })
         .then(setItems)
@@ -45,7 +47,7 @@ function Catalogo() {
         .finally(() => setLoading(false));
     }, 180);
     return () => clearTimeout(t);
-  }, [q, brand, listingType, bodyType, city, fuel, minPrice, maxPrice]);
+  }, [q, brand, listingType, bodyType, city, fuel, minPrice, maxPrice, verifiedOnly]);
 
   return (
     <SiteShell>
@@ -53,8 +55,7 @@ function Catalogo() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Inventario</p>
         <h1 className="mt-2 font-display text-4xl font-semibold">Catálogo</h1>
         <p className="mt-2 max-w-xl text-sm text-muted">
-          Venta directa y permuta. Los filtros corren en el servidor, no en tu
-          navegador.
+          Solo anuncios aprobados. Los vendedores verificados llevan sello visible.
         </p>
 
         <div className="mt-8 grid gap-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] md:grid-cols-6">
@@ -62,7 +63,7 @@ function Catalogo() {
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
             <Input
               className="pl-9"
-              placeholder="Marca, modelo o ciudad"
+              placeholder="Marca, línea o ciudad"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               suppressHydrationWarning
@@ -119,6 +120,10 @@ function Catalogo() {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
           />
+          <label className="flex items-center gap-2 text-sm text-muted md:col-span-2">
+            <input type="checkbox" checked={verifiedOnly} onChange={(e) => setVerifiedOnly(e.target.checked)} />
+            Solo vendedores verificados
+          </label>
         </div>
 
         <p className="mt-5 text-sm text-muted">

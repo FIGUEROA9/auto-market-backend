@@ -55,7 +55,7 @@ function Home() {
               { label: "Activos", value: stats.active },
               { label: "En venta", value: stats.sale },
               { label: "Permuta", value: stats.swap },
-              { label: "Ciudades", value: stats.cities },
+              { label: "Verificados", value: stats.verified },
             ].map((s) => (
               <div
                 key={s.label}
@@ -75,17 +75,17 @@ function Home() {
             {
               icon: Tag,
               title: "Comprar",
-              text: "Filtra por marca, ciudad, precio y tipo. Envía una oferta formal al vendedor.",
+              text: "Filtra por marca, ciudad, precio y tipo. Envía una oferta formal o contraoferta al vendedor.",
             },
             {
               icon: Shield,
               title: "Vender",
-              text: "Publica foto, precio y condiciones. Recibes ofertas y decides tú.",
+              text: "Publica fotos, papeles y condiciones. Si no estás verificado, un administrador aprueba el anuncio.",
             },
             {
               icon: RefreshCw,
               title: "Permutar",
-              text: "Cambia tu vehículo por otro del catálogo. La diferencia se negocia en la oferta.",
+              text: "Define qué tipo de vehículo recibes: marca, línea, kilometraje y el resto de filtros.",
             },
           ].map((item) => (
             <div key={item.title} className="rounded-xl bg-surface p-6 shadow-[var(--shadow-border)]">

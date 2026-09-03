@@ -1,18 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { SiteShell } from "@/components/site-shell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { OFFER_TYPE_LABEL, STATUS_LABEL, formatCop } from "@/lib/format";
-import { listMyOffers, respondOffer, type Offer } from "@/lib/market";
+import {
+  counterOffer,
+  listMyOffers,
+  listMyVehicles,
+  respondOffer,
+  type Offer,
+  type Vehicle,
+} from "@/lib/market";
 
 export const Route = createFileRoute("/ofertas")({ component: Ofertas });
 
 function tone(status: string) {
-  if (status === "pendiente") return "warn" as const;
+  if (status === "pendiente" || status === "contraoferta") return "warn" as const;
   if (status === "aceptada") return "success" as const;
   if (status === "rechazada") return "danger" as const;
   return "neutral" as const;
@@ -20,22 +28,69 @@ function tone(status: string) {
 
 function OfferCard({
   offer,
-  incoming,
-  onAct,
+  userId,
+  mine,
+  onDone,
 }: {
   offer: Offer;
-  incoming?: boolean;
-  onAct?: (status: "aceptada" | "rechazada") => void;
+  userId: string;
+  mine: Vehicle[];
+  onDone: () => void;
 }) {
+  const incoming = offer.vehicleOwnerId === userId;
+  const open = offer.status === "pendiente" || offer.status === "contraoferta";
+  const myTurn = open && offer.lastActorId !== userId;
+  const [showCounter, setShowCounter] = useState(false);
+  const [amount, setAmount] = useState(offer.amount != null ? String(offer.amount) : "");
+  const [swapId, setSwapId] = useState(offer.swapVehicleId ? String(offer.swapVehicleId) : "");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function act(status: "aceptada" | "rechazada") {
+    setBusy(true);
+    try {
+      await respondOffer({ data: { id: offer.id, status } });
+      toast.success(status === "aceptada" ? "Oferta aceptada. El anuncio pasó a vendido." : "Oferta rechazada.");
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo actualizar.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onCounter(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      await counterOffer({
+        data: {
+          id: offer.id,
+          amount: amount ? Number(amount) : undefined,
+          swapVehicleId: swapId ? Number(swapId) : undefined,
+          message,
+        },
+      });
+      toast.success("Contraoferta enviada.");
+      setShowCounter(false);
+      onDone();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo contraofertar.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <article className="flex gap-4 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)]">
+    <article className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] sm:flex-row">
       {offer.vehicleImage && (
-        <img src={offer.vehicleImage} alt="" className="hidden h-20 w-28 rounded-lg object-cover sm:block" />
+        <img src={offer.vehicleImage} alt="" className="h-24 w-full rounded-lg object-cover sm:h-20 sm:w-28" />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={tone(offer.status)}>{STATUS_LABEL[offer.status]}</Badge>
           <Badge>{OFFER_TYPE_LABEL[offer.offerType]}</Badge>
+          {incoming && offer.matchesPrefs === false && <Badge tone="warn">Fuera de preferencias</Badge>}
         </div>
         <Link to="/vehiculo/$id" params={{ id: String(offer.vehicleId) }} className="mt-2 block font-display text-lg font-semibold">
           {offer.vehicleTitle}
@@ -45,19 +100,70 @@ function OfferCard({
           {offer.offerType === "compra" && offer.amount != null
             ? formatCop(offer.amount)
             : offer.swapTitle
-              ? `Permuta por ${offer.swapTitle}`
+              ? `Permuta por ${offer.swapTitle}${offer.amount ? ` + ${formatCop(offer.amount)}` : ""}`
               : "Permuta"}
         </p>
         {offer.message && <p className="mt-2 text-sm leading-relaxed text-muted">{offer.message}</p>}
-        {incoming && offer.status === "pendiente" && onAct && (
-          <div className="mt-3 flex gap-2">
-            <Button size="sm" onClick={() => onAct("aceptada")}>
+        {offer.events && offer.events.length > 1 && (
+          <ol className="mt-3 grid gap-1 border-l border-border pl-3 text-xs text-subtle">
+            {offer.events.map((ev) => (
+              <li key={ev.id}>
+                {ev.actorName ?? "Usuario"} · {STATUS_LABEL[ev.action] ?? ev.action}
+                {ev.amount != null ? ` · ${formatCop(ev.amount)}` : ""}
+                {ev.message ? ` — ${ev.message}` : ""}
+              </li>
+            ))}
+          </ol>
+        )}
+        {myTurn && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button size="sm" disabled={busy} onClick={() => void act("aceptada")}>
               Aceptar
             </Button>
-            <Button size="sm" variant="outline" onClick={() => onAct("rechazada")}>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void act("rechazada")}>
               Rechazar
             </Button>
+            <Button size="sm" variant="secondary" disabled={busy} onClick={() => setShowCounter((v) => !v)}>
+              Contraofertar
+            </Button>
           </div>
+        )}
+        {open && !myTurn && (
+          <p className="mt-3 text-xs text-subtle">Esperando respuesta de la otra parte.</p>
+        )}
+        {showCounter && myTurn && (
+          <form onSubmit={onCounter} className="mt-4 grid gap-3 rounded-lg bg-elevated p-3">
+            {offer.offerType === "compra" && (
+              <Field label="Nuevo monto COP">
+                <Input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)} required />
+              </Field>
+            )}
+            {offer.offerType === "permuta" && (
+              <>
+                {!incoming && (
+                  <Field label="Tu vehículo">
+                    <Select value={swapId} onChange={(e) => setSwapId(e.target.value)}>
+                      <option value="">Mantener el actual</option>
+                      {mine.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.title}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                )}
+                <Field label="Diferencia COP (opcional)">
+                  <Input type="number" min={0} value={amount} onChange={(e) => setAmount(e.target.value)} />
+                </Field>
+              </>
+            )}
+            <Field label="Mensaje de la contraoferta">
+              <Textarea value={message} onChange={(e) => setMessage(e.target.value)} required minLength={2} />
+            </Field>
+            <Button type="submit" size="sm" disabled={busy}>
+              {busy ? "Enviando…" : "Enviar contraoferta"}
+            </Button>
+          </form>
         )}
       </div>
     </article>
@@ -67,9 +173,12 @@ function OfferCard({
 function Ofertas() {
   const { user, isPending } = useCurrentUserState();
   const [data, setData] = useState<{ sent: Offer[]; received: Offer[] } | null>(null);
+  const [mine, setMine] = useState<Vehicle[]>([]);
 
   async function reload() {
-    setData(await listMyOffers());
+    const [offers, vehicles] = await Promise.all([listMyOffers(), listMyVehicles()]);
+    setData(offers);
+    setMine(vehicles.filter((v) => v.status === "activo"));
   }
 
   useEffect(() => {
@@ -88,30 +197,21 @@ function Ofertas() {
   }
   if (!user) return <RedirectToSignIn />;
 
-  async function act(id: number, status: "aceptada" | "rechazada") {
-    try {
-      await respondOffer({ data: { id, status } });
-      toast.success(status === "aceptada" ? "Oferta aceptada. El anuncio pasó a vendido." : "Oferta rechazada.");
-      await reload();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo actualizar.");
-    }
-  }
-
   return (
     <SiteShell>
       <main className="mx-auto max-w-4xl px-4 py-10">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Negociación</p>
         <h1 className="mt-2 font-display text-4xl font-semibold">Ofertas</h1>
         <p className="mt-2 text-sm text-muted">
-          Recibidas sobre tus anuncios y las que tú enviaste. Aceptar una cierra el anuncio.
+          Recibidas sobre tus anuncios y las que tú enviaste. Puedes aceptar, rechazar o contraofertar.
+          Aceptar una cierra el anuncio.
         </p>
 
         <h2 className="mt-10 font-display text-xl font-semibold">Recibidas</h2>
         <div className="mt-4 grid gap-3">
           {data?.received.length ? (
             data.received.map((o) => (
-              <OfferCard key={o.id} offer={o} incoming onAct={(s) => void act(o.id, s)} />
+              <OfferCard key={o.id} offer={o} userId={user.id} mine={mine} onDone={() => void reload()} />
             ))
           ) : (
             <p className="text-sm text-muted">Nadie ha ofertado todavía por tus carros.</p>
@@ -121,7 +221,9 @@ function Ofertas() {
         <h2 className="mt-10 font-display text-xl font-semibold">Enviadas</h2>
         <div className="mt-4 grid gap-3">
           {data?.sent.length ? (
-            data.sent.map((o) => <OfferCard key={o.id} offer={o} />)
+            data.sent.map((o) => (
+              <OfferCard key={o.id} offer={o} userId={user.id} mine={mine} onDone={() => void reload()} />
+            ))
           ) : (
             <p className="text-sm text-muted">Aún no envías ofertas. Entra a un anuncio del catálogo.</p>
           )}
