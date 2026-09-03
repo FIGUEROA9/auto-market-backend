@@ -8,25 +8,28 @@ function Terminos() {
     <SiteShell>
       <main className="mx-auto max-w-2xl px-4 py-12">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Legal</p>
-        <h1 className="mt-2 font-display text-4xl font-semibold">Términos</h1>
-        <div className="mt-8 grid gap-4 text-sm leading-relaxed text-muted">
+        <h1 className="mt-2 font-display text-4xl font-semibold">Términos de uso</h1>
+        <div className="mt-8 grid gap-6 text-sm leading-relaxed text-muted">
           <p>
-            AutoMarket es un marketplace para compra, venta y permuta de vehículos entre
-            particulares. La plataforma publica anuncios y facilita ofertas; no es
-            intermediario de pago ni garante del estado mecánico.
+            AutoMarket es un marketplace de anuncios entre particulares. No
+            interviene como comprador, vendedor ni intermediario de dinero. El
+            acuerdo, la revisión mecánica y el traspaso son responsabilidad de
+            las partes.
           </p>
           <p>
-            El vendedor es responsable de la veracidad del anuncio, papeles y
-            kilometraje. El comprador debe verificar el vehículo antes de cerrar.
-          </p>
-          <p>
-            Las ofertas (compra o permuta) son propuestas no vinculantes hasta que
-            ambas partes confirmen. AutoMarket puede pausar anuncios que incumplan
+            Quien publica declara ser dueño o estar autorizado a disponer del
+            vehículo, y que la información (precio, kilometraje, estado y fotos)
+            es veraz. AutoMarket puede pausar o retirar anuncios que incumplan
             estas reglas.
           </p>
           <p>
-            Al crear una cuenta aceptas el tratamiento de los datos de perfil
-            necesarios para operar el marketplace.
+            Las ofertas de compra o permuta no constituyen un contrato hasta que
+            el vendedor las acepte. Aceptar una oferta marca el anuncio como
+            vendido y cierra las demás ofertas pendientes sobre ese vehículo.
+          </p>
+          <p>
+            Los datos de contacto se usan solo para operar el marketplace y
+            responder mensajes. No se venden a terceros.
           </p>
         </div>
       </main>

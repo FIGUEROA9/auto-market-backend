@@ -11,138 +11,119 @@ import { listMyOffers, respondOffer, type Offer } from "@/lib/market";
 
 export const Route = createFileRoute("/ofertas")({ component: Ofertas });
 
-function toneFor(status: string) {
+function tone(status: string) {
+  if (status === "pendiente") return "warn" as const;
   if (status === "aceptada") return "success" as const;
   if (status === "rechazada") return "danger" as const;
-  if (status === "cerrada") return "neutral" as const;
-  return "warn" as const;
+  return "neutral" as const;
 }
 
-function OfferList({
-  items,
+function OfferCard({
+  offer,
   incoming,
-  onChange,
+  onAct,
 }: {
-  items: Offer[];
+  offer: Offer;
   incoming?: boolean;
-  onChange: () => void;
+  onAct?: (status: "aceptada" | "rechazada") => void;
 }) {
-  if (!items.length) {
-    return <p className="text-sm text-muted">Nada por aquí todavía.</p>;
-  }
   return (
-    <ul className="grid gap-3">
-      {items.map((o) => (
-        <li key={o.id} className="rounded-xl border border-border bg-surface p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex flex-wrap gap-2">
-                <Badge>{OFFER_TYPE_LABEL[o.offerType]}</Badge>
-                <Badge tone={toneFor(o.status)}>{STATUS_LABEL[o.status] ?? o.status}</Badge>
-              </div>
-              <Link
-                to="/vehiculo/$id"
-                params={{ id: String(o.vehicleId) }}
-                className="mt-2 block font-medium hover:underline"
-              >
-                {o.vehicleTitle}
-              </Link>
-              {o.offerType === "compra" && o.amount != null && (
-                <p className="mt-1 text-sm tabular-nums text-muted">{formatCop(o.amount)}</p>
-              )}
-              {o.offerType === "permuta" && o.swapTitle && (
-                <p className="mt-1 text-sm text-muted">A cambio de: {o.swapTitle}</p>
-              )}
-              {o.message && <p className="mt-2 text-sm text-muted">{o.message}</p>}
-              {incoming && o.buyerName && (
-                <p className="mt-2 text-xs text-subtle">De {o.buyerName}</p>
-              )}
-            </div>
-            {incoming && o.status === "pendiente" && (
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    await respondOffer({ data: { id: o.id, status: "aceptada" } });
-                    toast.success("Oferta aceptada. El anuncio pasa a vendido.");
-                    onChange();
-                  }}
-                >
-                  Aceptar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={async () => {
-                    await respondOffer({ data: { id: o.id, status: "rechazada" } });
-                    onChange();
-                  }}
-                >
-                  Rechazar
-                </Button>
-              </div>
-            )}
+    <article className="flex gap-4 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)]">
+      {offer.vehicleImage && (
+        <img src={offer.vehicleImage} alt="" className="hidden h-20 w-28 rounded-lg object-cover sm:block" />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone={tone(offer.status)}>{STATUS_LABEL[offer.status]}</Badge>
+          <Badge>{OFFER_TYPE_LABEL[offer.offerType]}</Badge>
+        </div>
+        <Link to="/vehiculo/$id" params={{ id: String(offer.vehicleId) }} className="mt-2 block font-display text-lg font-semibold">
+          {offer.vehicleTitle}
+        </Link>
+        <p className="mt-1 text-sm text-muted">
+          {incoming ? offer.buyerName ?? "Comprador" : "Tú"} ·{" "}
+          {offer.offerType === "compra" && offer.amount != null
+            ? formatCop(offer.amount)
+            : offer.swapTitle
+              ? `Permuta por ${offer.swapTitle}`
+              : "Permuta"}
+        </p>
+        {offer.message && <p className="mt-2 text-sm leading-relaxed text-muted">{offer.message}</p>}
+        {incoming && offer.status === "pendiente" && onAct && (
+          <div className="mt-3 flex gap-2">
+            <Button size="sm" onClick={() => onAct("aceptada")}>
+              Aceptar
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => onAct("rechazada")}>
+              Rechazar
+            </Button>
           </div>
-        </li>
-      ))}
-    </ul>
+        )}
+      </div>
+    </article>
   );
 }
 
 function Ofertas() {
   const { user, isPending } = useCurrentUserState();
   const [data, setData] = useState<{ sent: Offer[]; received: Offer[] } | null>(null);
-  const [tab, setTab] = useState<"recibidas" | "enviadas">("recibidas");
 
-  function load() {
-    listMyOffers()
-      .then(setData)
-      .catch(() => setData({ sent: [], received: [] }));
+  async function reload() {
+    setData(await listMyOffers());
   }
 
   useEffect(() => {
-    if (user) load();
-  }, [user]);
+    if (isPending || !user) return;
+    reload().catch(() => setData({ sent: [], received: [] }));
+  }, [user, isPending]);
 
   if (isPending) {
     return (
       <SiteShell>
-        <div className="mx-auto max-w-4xl px-4 py-16">
-          <div className="h-32 animate-pulse rounded-xl bg-surface" />
+        <div className="mx-auto max-w-4xl px-4 py-20">
+          <div className="h-40 animate-pulse rounded-xl bg-surface" />
         </div>
       </SiteShell>
     );
   }
   if (!user) return <RedirectToSignIn />;
 
+  async function act(id: number, status: "aceptada" | "rechazada") {
+    try {
+      await respondOffer({ data: { id, status } });
+      toast.success(status === "aceptada" ? "Oferta aceptada. El anuncio pasó a vendido." : "Oferta rechazada.");
+      await reload();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo actualizar.");
+    }
+  }
+
   return (
     <SiteShell>
       <main className="mx-auto max-w-4xl px-4 py-10">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Negociación</p>
         <h1 className="mt-2 font-display text-4xl font-semibold">Ofertas</h1>
-        <div className="mt-6 grid grid-cols-2 rounded-lg border border-border p-1">
-          <button
-            type="button"
-            className={tab === "recibidas" ? "h-10 rounded-md bg-elevated text-sm" : "h-10 text-sm text-muted"}
-            onClick={() => setTab("recibidas")}
-          >
-            Recibidas {data ? `(${data.received.length})` : ""}
-          </button>
-          <button
-            type="button"
-            className={tab === "enviadas" ? "h-10 rounded-md bg-elevated text-sm" : "h-10 text-sm text-muted"}
-            onClick={() => setTab("enviadas")}
-          >
-            Enviadas {data ? `(${data.sent.length})` : ""}
-          </button>
-        </div>
-        <div className="mt-6">
-          {data == null ? (
-            <div className="h-32 animate-pulse rounded-xl bg-surface" />
-          ) : tab === "recibidas" ? (
-            <OfferList items={data.received} incoming onChange={load} />
+        <p className="mt-2 text-sm text-muted">
+          Recibidas sobre tus anuncios y las que tú enviaste. Aceptar una cierra el anuncio.
+        </p>
+
+        <h2 className="mt-10 font-display text-xl font-semibold">Recibidas</h2>
+        <div className="mt-4 grid gap-3">
+          {data?.received.length ? (
+            data.received.map((o) => (
+              <OfferCard key={o.id} offer={o} incoming onAct={(s) => void act(o.id, s)} />
+            ))
           ) : (
-            <OfferList items={data.sent} onChange={load} />
+            <p className="text-sm text-muted">Nadie ha ofertado todavía por tus carros.</p>
+          )}
+        </div>
+
+        <h2 className="mt-10 font-display text-xl font-semibold">Enviadas</h2>
+        <div className="mt-4 grid gap-3">
+          {data?.sent.length ? (
+            data.sent.map((o) => <OfferCard key={o.id} offer={o} />)
+          ) : (
+            <p className="text-sm text-muted">Aún no envías ofertas. Entra a un anuncio del catálogo.</p>
           )}
         </div>
       </main>

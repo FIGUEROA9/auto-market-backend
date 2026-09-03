@@ -13,8 +13,9 @@ var install_page_default = "<!DOCTYPE html>\n<html lang=\"en\" class=\"device-de
 //#region \0virtual:grok-og-identity
 var grokOgIdentity = { "site": {
 	"title": "AutoMarket",
+	"description": "Compra, venta y permuta de vehículos entre personas en Colombia.",
 	"card": "custom",
-	"description": "Compra, venta y permuta de vehículos. Marketplace directo entre personas.",
+	"color": "e8a54b",
 	"image": "/og.jpg"
 } };
 //#endregion

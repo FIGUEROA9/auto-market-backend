@@ -22,20 +22,20 @@ function Home() {
         <img
           src="/vehicles/hero.jpg"
           alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-40"
+          className="absolute inset-0 h-full w-full object-cover opacity-45"
         />
-        <div className="absolute inset-0 bg-linear-to-r from-bg via-bg/85 to-bg/40" />
+        <div className="absolute inset-0 bg-linear-to-r from-bg via-bg/80 to-bg/35" />
         <div className="relative mx-auto grid max-w-6xl gap-10 px-4 py-20 md:grid-cols-12 md:py-28">
           <div className="md:col-span-7">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">
               Marketplace de vehículos
             </p>
             <h1 className="mt-4 font-display text-4xl font-semibold leading-tight text-fg md:text-6xl">
-              Compra, vende o permuta. Sin intermediarios ruidosos.
+              Compra, vende o permuta. Sin ruido de concesionario.
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted">
-              AutoMarket conecta dueños reales. Publica tu carro, haz una oferta
-              de compra o propone una permuta con tu propio vehículo.
+              AutoMarket conecta dueños reales en Colombia. Publica tu carro,
+              envía una oferta de compra o propone una permuta con el tuyo.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/catalogo">
@@ -57,7 +57,10 @@ function Home() {
               { label: "Permuta", value: stats.swap },
               { label: "Ciudades", value: stats.cities },
             ].map((s) => (
-              <div key={s.label} className="rounded-xl border border-border bg-surface/80 p-4 backdrop-blur-sm">
+              <div
+                key={s.label}
+                className="rounded-xl bg-surface/80 p-4 shadow-[var(--shadow-border)] backdrop-blur-sm"
+              >
                 <p className="text-xs uppercase tracking-wider text-subtle">{s.label}</p>
                 <p className="mt-2 font-display text-3xl font-semibold tabular-nums">{s.value}</p>
               </div>
@@ -72,20 +75,20 @@ function Home() {
             {
               icon: Tag,
               title: "Comprar",
-              text: "Filtra por marca, ciudad y tipo. Envía una oferta formal al vendedor.",
+              text: "Filtra por marca, ciudad, precio y tipo. Envía una oferta formal al vendedor.",
             },
             {
               icon: Shield,
               title: "Vender",
-              text: "Publica fotos, precio y condiciones. Recibe ofertas y decide tú.",
+              text: "Publica foto, precio y condiciones. Recibes ofertas y decides tú.",
             },
             {
               icon: RefreshCw,
               title: "Permutar",
-              text: "Cambia tu vehículo por otro del catálogo. La diferencia se negocia.",
+              text: "Cambia tu vehículo por otro del catálogo. La diferencia se negocia en la oferta.",
             },
           ].map((item) => (
-            <div key={item.title} className="rounded-xl border border-border bg-surface p-6">
+            <div key={item.title} className="rounded-xl bg-surface p-6 shadow-[var(--shadow-border)]">
               <item.icon className="size-5 text-accent" />
               <h2 className="mt-4 font-display text-xl font-semibold">{item.title}</h2>
               <p className="mt-2 text-sm leading-relaxed text-muted">{item.text}</p>

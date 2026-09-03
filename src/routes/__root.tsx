@@ -1,7 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { Toaster } from "sonner";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
-import { Toaster } from "sonner";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "AutoMarket";
@@ -14,9 +14,9 @@ export const Route = createRootRoute({
       { title: APP_NAME },
       {
         name: "description",
-        content: "Compra, venta y permuta de vehículos. Marketplace directo entre personas.",
+        content: "Compra, venta y permuta de vehículos entre personas en Colombia.",
       },
-      { name: "theme-color", content: "#0b0b0c" },
+      { name: "theme-color", content: "#0c0d10" },
     ],
     links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -24,26 +24,31 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Syne:wght@500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap",
       },
     ],
   }),
   component: () => (
-    <html lang="es" className="dark antialiased" suppressHydrationWarning>
+    <html lang="es" className="antialiased" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="bg-bg text-fg">
         <PreviewHostBridge />
         <AuthProvider>
           <Outlet />
           <Toaster
             theme="dark"
+            position="top-center"
             toastOptions={{
-              className: "bg-surface text-fg border-border",
+              style: {
+                background: "var(--color-elevated)",
+                color: "var(--color-fg)",
+                border: "1px solid var(--color-border)",
+              },
             }}
           />
         </AuthProvider>

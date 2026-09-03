@@ -19,10 +19,15 @@ function Catalogo() {
   const [listingType, setListingType] = useState("");
   const [bodyType, setBodyType] = useState("");
   const [city, setCity] = useState("");
+  const [fuel, setFuel] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [items, setItems] = useState<Vehicle[]>(initial);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
+      setLoading(true);
       listVehicles({
         data: {
           q: q || undefined,
@@ -30,13 +35,17 @@ function Catalogo() {
           listingType: listingType || undefined,
           bodyType: bodyType || undefined,
           city: city || undefined,
+          fuel: fuel || undefined,
+          minPrice: minPrice ? Number(minPrice) : undefined,
+          maxPrice: maxPrice ? Number(maxPrice) : undefined,
         },
       })
         .then(setItems)
-        .catch(() => setItems([]));
-    }, 120);
+        .catch(() => setItems([]))
+        .finally(() => setLoading(false));
+    }, 180);
     return () => clearTimeout(t);
-  }, [q, brand, listingType, bodyType, city]);
+  }, [q, brand, listingType, bodyType, city, fuel, minPrice, maxPrice]);
 
   return (
     <SiteShell>
@@ -44,15 +53,16 @@ function Catalogo() {
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Inventario</p>
         <h1 className="mt-2 font-display text-4xl font-semibold">Catálogo</h1>
         <p className="mt-2 max-w-xl text-sm text-muted">
-          Venta directa y permuta. Filtra y entra al detalle para ofertar.
+          Venta directa y permuta. Los filtros corren en el servidor, no en tu
+          navegador.
         </p>
 
-        <div className="mt-8 grid gap-3 rounded-xl border border-border bg-surface p-4 md:grid-cols-5">
+        <div className="mt-8 grid gap-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] md:grid-cols-6">
           <div className="relative md:col-span-2">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-subtle" />
             <Input
               className="pl-9"
-              placeholder="Buscar marca, modelo o ciudad"
+              placeholder="Marca, modelo o ciudad"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               suppressHydrationWarning
@@ -79,11 +89,8 @@ function Catalogo() {
               </option>
             ))}
           </Select>
-        </div>
-
-        <div className="mt-4">
-          <Select value={bodyType} onChange={(e) => setBodyType(e.target.value)} className="max-w-xs">
-            <option value="">Todo tipo de carrocería</option>
+          <Select value={bodyType} onChange={(e) => setBodyType(e.target.value)}>
+            <option value="">Carrocería</option>
             <option value="sedan">Sedán</option>
             <option value="suv">SUV</option>
             <option value="pickup">Pickup</option>
@@ -91,12 +98,37 @@ function Catalogo() {
             <option value="van">Van</option>
             <option value="coupe">Coupé</option>
           </Select>
+          <Select value={fuel} onChange={(e) => setFuel(e.target.value)}>
+            <option value="">Combustible</option>
+            <option value="gasolina">Gasolina</option>
+            <option value="diesel">Diésel</option>
+            <option value="hibrido">Híbrido</option>
+            <option value="electrico">Eléctrico</option>
+          </Select>
+          <Input
+            type="number"
+            min={0}
+            placeholder="Precio min"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+          />
+          <Input
+            type="number"
+            min={0}
+            placeholder="Precio max"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+          />
         </div>
+
+        <p className="mt-5 text-sm text-muted">
+          {loading ? "Buscando…" : `${items.length} vehículo${items.length === 1 ? "" : "s"}`}
+        </p>
 
         {items.length === 0 ? (
           <p className="mt-16 text-center text-sm text-muted">No hay vehículos con esos filtros.</p>
         ) : (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((v) => (
               <VehicleCard key={v.id} vehicle={v} />
             ))}

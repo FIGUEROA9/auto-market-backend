@@ -83,3 +83,15 @@ export const CITIES = [
   "Pereira",
   "Otra",
 ] as const;
+
+export const STOCK_IMAGES = [
+  { src: "/vehicles/corolla.jpg", label: "Sedán plata" },
+  { src: "/vehicles/cx30.jpg", label: "SUV rojo" },
+  { src: "/vehicles/onix.jpg", label: "Hatch blanco" },
+  { src: "/vehicles/duster.jpg", label: "SUV gris" },
+  { src: "/vehicles/sportage.jpg", label: "SUV negro" },
+  { src: "/vehicles/frontier.jpg", label: "Pickup gris" },
+  { src: "/vehicles/ranger.jpg", label: "Pickup naranja" },
+  { src: "/vehicles/jetta.jpg", label: "Sedán azul" },
+  { src: "/vehicles/tucson.jpg", label: "SUV perla" },
+] as const;

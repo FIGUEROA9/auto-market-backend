@@ -3,51 +3,41 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { adminDeleteContact, adminListContacts, type ContactRow } from "@/lib/market";
 
-export const Route = createFileRoute("/admin/contactos")({ component: AdminContactos });
+export const Route = createFileRoute("/admin/contactos")({ component: ContactosAdmin });
 
-function AdminContactos() {
-  const [rows, setRows] = useState<ContactRow[] | null>(null);
+function ContactosAdmin() {
+  const [rows, setRows] = useState<ContactRow[]>([]);
 
-  function load() {
-    adminListContacts()
-      .then(setRows)
-      .catch(() => setRows([]));
+  async function reload() {
+    setRows(await adminListContacts());
   }
 
   useEffect(() => {
-    load();
+    reload().catch(() => setRows([]));
   }, []);
 
   return (
     <div>
       <h1 className="font-display text-3xl font-semibold">Contactos</h1>
-      <p className="mt-1 text-sm text-muted">Mensajes del formulario público.</p>
+      <p className="mt-1 text-sm text-muted">{rows.length} mensajes recibidos.</p>
       <ul className="mt-6 grid gap-3">
-        {(rows ?? []).map((c) => (
-          <li key={c.id} className="rounded-xl border border-border bg-surface p-4">
+        {rows.map((c) => (
+          <li key={c.id} className="rounded-xl bg-surface p-4 shadow-[var(--shadow-border)]">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium">{c.name}</p>
-                <p className="text-xs text-subtle">
+                <p className="text-sm text-muted">
                   {c.email} · {c.phone}
                 </p>
-                {c.subject && <p className="mt-2 text-sm">{c.subject}</p>}
-                <p className="mt-2 text-sm text-muted">{c.message}</p>
+                {c.subject && <p className="mt-1 text-sm text-fg">{c.subject}</p>}
+                <p className="mt-2 text-sm leading-relaxed text-muted">{c.message}</p>
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={async () => {
-                  await adminDeleteContact({ data: { id: c.id } });
-                  load();
-                }}
-              >
-                Eliminar
+              <Button size="sm" variant="ghost" onClick={() => void adminDeleteContact({ data: { id: c.id } }).then(reload)}>
+                Borrar
               </Button>
             </div>
           </li>
         ))}
-        {rows?.length === 0 && <p className="text-sm text-muted">No hay mensajes.</p>}
       </ul>
     </div>
   );

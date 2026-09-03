@@ -6,29 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Textarea } from "@/components/ui/input";
 import { RedirectToSignIn } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
-import { BRANDS, CITIES } from "@/lib/format";
+import { BRANDS, CITIES, STOCK_IMAGES } from "@/lib/format";
 import { createVehicle } from "@/lib/market";
 
 export const Route = createFileRoute("/publicar")({ component: Publicar });
-
-const STOCK_IMAGES = [
-  "/vehicles/corolla.jpg",
-  "/vehicles/cx5.jpg",
-  "/vehicles/onix.jpg",
-  "/vehicles/duster.jpg",
-  "/vehicles/sportage.jpg",
-  "/vehicles/frontier.jpg",
-  "/vehicles/ranger.jpg",
-  "/vehicles/tiguan.jpg",
-  "/vehicles/hilux.jpg",
-  "/vehicles/mazda3.jpg",
-];
 
 function Publicar() {
   const { user, isPending } = useCurrentUserState();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
-  const [imageUrl, setImageUrl] = useState(STOCK_IMAGES[0]);
+  const [imageUrl, setImageUrl] = useState<string>(STOCK_IMAGES[0].src);
 
   if (isPending) {
     return (
@@ -82,7 +69,9 @@ function Publicar() {
   return (
     <SiteShell>
       <main className="mx-auto max-w-2xl px-4 py-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Vender o permutar</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">
+          Vender o permutar
+        </p>
         <h1 className="mt-2 font-display text-4xl font-semibold">Publicar anuncio</h1>
         <form onSubmit={onSubmit} className="mt-8 grid gap-4">
           <Field label="Título">
@@ -165,19 +154,20 @@ function Publicar() {
           </Field>
           <div>
             <p className="mb-2 text-sm font-medium text-muted">Foto del anuncio</p>
-            <div className="grid grid-cols-5 gap-2">
-              {STOCK_IMAGES.map((src) => (
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+              {STOCK_IMAGES.map((img) => (
                 <button
-                  key={src}
+                  key={img.src}
                   type="button"
-                  onClick={() => setImageUrl(src)}
+                  onClick={() => setImageUrl(img.src)}
                   className={
-                    imageUrl === src
+                    imageUrl === img.src
                       ? "overflow-hidden rounded-md ring-2 ring-accent"
                       : "overflow-hidden rounded-md ring-1 ring-border"
                   }
+                  aria-label={img.label}
                 >
-                  <img src={src} alt="" className="aspect-square object-cover" />
+                  <img src={img.src} alt="" className="aspect-square object-cover" />
                 </button>
               ))}
             </div>

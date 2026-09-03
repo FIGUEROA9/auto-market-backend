@@ -28,8 +28,8 @@ function Contacto() {
       });
       setSent(true);
       toast.success("Mensaje enviado.");
-    } catch {
-      toast.error("No se pudo enviar. Intenta de nuevo.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo enviar.");
     } finally {
       setBusy(false);
     }
@@ -37,33 +37,32 @@ function Contacto() {
 
   return (
     <SiteShell>
-      <main className="mx-auto grid max-w-5xl gap-10 px-4 py-12 lg:grid-cols-2">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Soporte</p>
-          <h1 className="mt-2 font-display text-4xl font-semibold">Contacto</h1>
-          <p className="mt-4 text-sm leading-relaxed text-muted">
-            ¿Dudas sobre una permuta, un anuncio o el proceso de compra? Escríbenos.
-            El equipo de AutoMarket responde en horario hábil.
-          </p>
-        </div>
+      <main className="mx-auto max-w-xl px-4 py-12">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Soporte</p>
+        <h1 className="mt-2 font-display text-4xl font-semibold">Contacto</h1>
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          Dudas de un anuncio, reportes o alianzas. El equipo de AutoMarket lee
+          cada mensaje.
+        </p>
         {sent ? (
-          <div className="rounded-xl border border-border bg-surface p-8">
-            <h2 className="font-display text-2xl font-semibold">Recibido</h2>
-            <p className="mt-2 text-sm text-muted">Te contactaremos al correo que dejaste.</p>
-          </div>
+          <p className="mt-10 rounded-xl bg-surface p-6 text-sm text-muted shadow-[var(--shadow-border)]">
+            Gracias. Te respondemos al correo que dejaste.
+          </p>
         ) : (
-          <form onSubmit={onSubmit} className="grid gap-4 rounded-xl border border-border bg-surface p-6">
+          <form onSubmit={onSubmit} className="mt-8 grid gap-4">
             <Field label="Nombre">
               <Input name="name" required minLength={2} />
             </Field>
-            <Field label="Correo">
-              <Input name="email" type="email" required />
-            </Field>
-            <Field label="Teléfono">
-              <Input name="phone" required minLength={6} />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Correo">
+                <Input name="email" type="email" required />
+              </Field>
+              <Field label="Teléfono">
+                <Input name="phone" required minLength={6} />
+              </Field>
+            </div>
             <Field label="Asunto">
-              <Input name="subject" />
+              <Input name="subject" placeholder="Quiero vender / reportar / alianza" />
             </Field>
             <Field label="Mensaje">
               <Textarea name="message" required minLength={8} />

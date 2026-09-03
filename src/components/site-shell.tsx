@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Heart, Menu, RefreshCw, Tag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SignedIn, SignedOut, UserButton } from "@/lib/auth/gates";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
@@ -39,6 +39,16 @@ function AuthSlot({ isAdmin }: { isAdmin: boolean }) {
   );
 }
 
+function Mark() {
+  return (
+    <span className="grid size-8 place-items-center rounded-md bg-accent text-accent-fg">
+      <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
+        <path d="M5 17a2 2 0 1 0 4 0H5Zm10 0a2 2 0 1 0 4 0h-4ZM4.2 11l1.4-4.2A2 2 0 0 1 7.5 5.5h9a2 2 0 0 1 1.9 1.3L20 11H4.2ZM3 12h18v3.5a1.5 1.5 0 0 1-1.5 1.5H19a3 3 0 0 0-6 0H11a3 3 0 0 0-6 0H4.5A1.5 1.5 0 0 1 3 15.5V12Z" />
+      </svg>
+    </span>
+  );
+}
+
 export function SiteHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, isPending } = useCurrentUserState();
@@ -63,11 +73,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border bg-bg/90 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-md bg-accent text-accent-fg">
-            <svg viewBox="0 0 24 24" className="size-4" fill="currentColor" aria-hidden>
-              <path d="M5 17a2 2 0 1 0 4 0H5Zm10 0a2 2 0 1 0 4 0h-4ZM4.2 11l1.4-4.2A2 2 0 0 1 7.5 5.5h9a2 2 0 0 1 1.9 1.3L20 11H4.2ZM3 12h18v3.5a1.5 1.5 0 0 1-1.5 1.5H19a3 3 0 0 0-6 0H11a3 3 0 0 0-6 0H4.5A1.5 1.5 0 0 1 3 15.5V12Z" />
-            </svg>
-          </span>
+          <Mark />
           <span className="font-display text-lg font-semibold tracking-tight">AutoMarket</span>
         </Link>
 
@@ -84,6 +90,35 @@ export function SiteHeader() {
               {l.label}
             </Link>
           ))}
+          <SignedIn>
+            <Link
+              to="/mis-anuncios"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname.startsWith("/mis-anuncios") ? "text-fg" : "text-muted hover:text-fg",
+              )}
+            >
+              Mis anuncios
+            </Link>
+            <Link
+              to="/ofertas"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname.startsWith("/ofertas") ? "text-fg" : "text-muted hover:text-fg",
+              )}
+            >
+              Ofertas
+            </Link>
+            <Link
+              to="/favoritos"
+              className={cn(
+                "text-sm font-medium transition-colors",
+                pathname.startsWith("/favoritos") ? "text-fg" : "text-muted hover:text-fg",
+              )}
+            >
+              Favoritos
+            </Link>
+          </SignedIn>
           <Link to="/publicar">
             <Button size="sm" variant="secondary">
               Publicar
@@ -104,7 +139,7 @@ export function SiteHeader() {
 
       {open && (
         <div className="border-t border-border bg-surface px-4 py-4 md:hidden">
-          <div className="grid gap-2">
+          <div className="grid gap-1">
             {LINKS.map((l) => (
               <Link key={l.to} to={l.to} className="rounded-md px-3 py-3 text-sm text-fg hover:bg-elevated">
                 {l.label}
@@ -133,7 +168,7 @@ export function SiteHeader() {
               )}
             </SignedIn>
             <SignedOut>
-              <Link to="/login">
+              <Link to="/login" className="mt-2">
                 <Button className="w-full">Entrar</Button>
               </Link>
             </SignedOut>
@@ -147,15 +182,18 @@ export function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-surface">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-12 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="font-display text-lg font-semibold">AutoMarket</p>
-          <p className="mt-2 max-w-xs text-sm text-muted">
-            Compra, venta y permuta de vehículos. Directo entre personas, con
-            proceso claro y transparente.
+          <div className="flex items-center gap-2">
+            <Mark />
+            <p className="font-display text-lg font-semibold">AutoMarket</p>
+          </div>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted">
+            Marketplace directo entre personas. Publica, oferta o permuta sin
+            intermediarios ruidosos.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-8 text-sm">
+        <div className="grid grid-cols-2 gap-10 text-sm">
           <div className="grid gap-2">
             <p className="font-medium text-fg">Mercado</p>
             <Link to="/catalogo" className="text-muted hover:text-fg">
@@ -173,14 +211,25 @@ export function SiteFooter() {
             <Link to="/login" className="text-muted hover:text-fg">
               Entrar
             </Link>
+            <Link to="/favoritos" className="text-muted hover:text-fg">
+              Favoritos
+            </Link>
             <Link to="/terminos" className="text-muted hover:text-fg">
               Términos
             </Link>
           </div>
         </div>
       </div>
-      <div className="border-t border-border py-4 text-center text-xs text-subtle">
-        AutoMarket · Marketplace de vehículos
+      <div className="flex flex-wrap items-center justify-center gap-4 border-t border-border py-4 text-xs text-subtle">
+        <span className="inline-flex items-center gap-1">
+          <Tag className="size-3.5" /> Compra
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <RefreshCw className="size-3.5" /> Permuta
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <Heart className="size-3.5" /> Directo
+        </span>
       </div>
     </footer>
   );

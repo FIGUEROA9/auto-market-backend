@@ -16,13 +16,13 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
     <Link
       to="/vehiculo/$id"
       params={{ id: String(vehicle.id) }}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors duration-200 hover:border-muted"
+      className="group flex flex-col overflow-hidden rounded-xl bg-surface shadow-[var(--shadow-border)] transition-[transform,box-shadow] duration-200 hover:-translate-y-0.5"
     >
-      <div className="relative aspect-16/9 overflow-hidden bg-elevated">
+      <div className="relative aspect-video overflow-hidden bg-elevated">
         <img
           src={vehicle.imageUrl}
           alt={vehicle.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
         <div className="absolute left-3 top-3">
           <Badge tone={listingTone}>{LISTING_LABEL[vehicle.listingType]}</Badge>
@@ -37,7 +37,7 @@ export function VehicleCard({ vehicle }: { vehicle: Vehicle }) {
             {vehicle.title}
           </h3>
         </div>
-        <p className="font-display text-xl font-semibold tabular-nums text-fg">
+        <p className="font-display text-xl font-semibold tabular-nums text-accent">
           {formatCop(vehicle.price)}
         </p>
         <div className="mt-auto flex flex-wrap items-center gap-3 text-xs text-muted">

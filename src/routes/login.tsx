@@ -50,7 +50,7 @@ function Login() {
           {mode === "entrar" ? "Entra a AutoMarket" : "Crea tu cuenta"}
         </h1>
         <p className="mt-2 text-sm text-muted">
-          El primer usuario en registrarse obtiene el panel de administración.
+          El primer usuario real que se registra obtiene el panel de administración.
         </p>
 
         <div className="mt-6 grid grid-cols-2 rounded-lg border border-border p-1">
@@ -61,8 +61,8 @@ function Login() {
               onClick={() => setMode(m)}
               className={
                 mode === m
-                  ? "h-10 rounded-md bg-elevated text-sm font-medium text-fg"
-                  : "h-10 rounded-md text-sm text-muted"
+                  ? "h-11 rounded-md bg-elevated text-sm font-medium text-fg"
+                  : "h-11 rounded-md text-sm text-muted"
               }
             >
               {m === "entrar" ? "Entrar" : "Crear cuenta"}
@@ -84,7 +84,7 @@ function Login() {
             ))}
           </div>
         ) : (
-          <p className="mt-6 text-sm text-muted">El acceso está desactivado.</p>
+          <p className="mt-6 text-sm text-muted">El inicio de sesión está desactivado.</p>
         )}
 
         <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-wider text-subtle">
@@ -93,14 +93,20 @@ function Login() {
           <span className="h-px flex-1 bg-border" />
         </div>
 
-        <form onSubmit={onSubmit} className="grid gap-4">
+        <form onSubmit={onSubmit} className="grid gap-3">
           {mode === "crear" && (
             <Field label="Nombre">
               <Input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} />
             </Field>
           )}
           <Field label="Correo">
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
           </Field>
           <Field label="Contraseña">
             <Input
@@ -109,14 +115,16 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
+              autoComplete={mode === "crear" ? "new-password" : "current-password"}
             />
           </Field>
           {error && <p className="text-sm text-danger">{error}</p>}
           <Button type="submit" disabled={busy}>
-            {busy ? "Procesando…" : mode === "entrar" ? "Entrar" : "Crear cuenta"}
+            {busy ? "Espera…" : mode === "crear" ? "Crear cuenta" : "Entrar"}
           </Button>
         </form>
-        <p className="mt-4 text-xs text-subtle">
+
+        <p className="mt-6 text-xs leading-relaxed text-subtle">
           Al continuar aceptas los{" "}
           <Link to="/terminos" className="text-muted underline">
             términos

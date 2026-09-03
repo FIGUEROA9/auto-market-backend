@@ -11,25 +11,32 @@ import { deleteMyVehicle, listMyVehicles, updateVehicleStatus, type Vehicle } fr
 
 export const Route = createFileRoute("/mis-anuncios")({ component: MisAnuncios });
 
+function toneFor(status: string) {
+  if (status === "activo") return "success" as const;
+  if (status === "pausado") return "warn" as const;
+  if (status === "vendido") return "accent" as const;
+  return "danger" as const;
+}
+
 function MisAnuncios() {
   const { user, isPending } = useCurrentUserState();
-  const [rows, setRows] = useState<Vehicle[] | null>(null);
+  const [items, setItems] = useState<Vehicle[] | null>(null);
 
-  function load() {
-    listMyVehicles()
-      .then(setRows)
-      .catch(() => setRows([]));
+  async function reload() {
+    const rows = await listMyVehicles();
+    setItems(rows);
   }
 
   useEffect(() => {
-    if (user) load();
-  }, [user]);
+    if (isPending || !user) return;
+    reload().catch(() => setItems([]));
+  }, [user, isPending]);
 
   if (isPending) {
     return (
       <SiteShell>
-        <div className="mx-auto max-w-5xl px-4 py-16">
-          <div className="h-32 animate-pulse rounded-xl bg-surface" />
+        <div className="mx-auto max-w-4xl px-4 py-20">
+          <div className="h-40 animate-pulse rounded-xl bg-surface" />
         </div>
       </SiteShell>
     );
@@ -38,91 +45,70 @@ function MisAnuncios() {
 
   return (
     <SiteShell>
-      <main className="mx-auto max-w-5xl px-4 py-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Tu inventario</p>
             <h1 className="mt-2 font-display text-4xl font-semibold">Mis anuncios</h1>
           </div>
           <Link to="/publicar">
-            <Button>Publicar</Button>
+            <Button size="sm">Publicar</Button>
           </Link>
         </div>
-        {rows === null ? (
-          <div className="mt-8 h-40 animate-pulse rounded-xl bg-surface" />
-        ) : rows.length === 0 ? (
-          <p className="mt-16 text-sm text-muted">Aún no publicas vehículos.</p>
+
+        {items === null ? (
+          <div className="mt-8 h-32 animate-pulse rounded-xl bg-surface" />
+        ) : items.length === 0 ? (
+          <p className="mt-16 text-center text-sm text-muted">
+            Todavía no publicas. Empieza con un anuncio para poder permutar.
+          </p>
         ) : (
           <ul className="mt-8 grid gap-3">
-            {rows.map((v) => (
+            {items.map((v) => (
               <li
                 key={v.id}
-                className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center"
+                className="flex flex-col gap-4 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] sm:flex-row sm:items-center"
               >
-                <img src={v.imageUrl} alt="" className="h-24 w-full rounded-lg object-cover sm:w-40" />
+                <img src={v.imageUrl} alt="" className="h-24 w-full rounded-lg object-cover sm:w-36" />
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge>{LISTING_LABEL[v.listingType]}</Badge>
-                    <Badge tone={v.status === "activo" ? "success" : v.status === "vendido" ? "accent" : "warn"}>
-                      {STATUS_LABEL[v.status]}
-                    </Badge>
-                  </div>
-                  <Link
-                    to="/vehiculo/$id"
-                    params={{ id: String(v.id) }}
-                    className="mt-1 block truncate font-medium hover:underline"
-                  >
+                  <Link to="/vehiculo/$id" params={{ id: String(v.id) }} className="font-display text-lg font-semibold">
                     {v.title}
                   </Link>
-                  <p className="text-sm tabular-nums text-muted">{formatCop(v.price)}</p>
+                  <p className="mt-1 text-sm tabular-nums text-muted">{formatCop(v.price)}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <Badge tone={toneFor(v.status)}>{STATUS_LABEL[v.status]}</Badge>
+                    <Badge>{LISTING_LABEL[v.listingType]}</Badge>
+                  </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {v.status === "activo" && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={async () => {
-                        await updateVehicleStatus({ data: { id: v.id, status: "pausado" } });
-                        load();
-                      }}
-                    >
-                      Pausar
-                    </Button>
-                  )}
-                  {v.status === "pausado" && (
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={async () => {
-                        await updateVehicleStatus({ data: { id: v.id, status: "activo" } });
-                        load();
-                      }}
-                    >
+                  {v.status !== "activo" && (
+                    <Button size="sm" variant="secondary" onClick={() => void updateVehicleStatus({ data: { id: v.id, status: "activo" } }).then(reload)}>
                       Activar
                     </Button>
                   )}
+                  {v.status === "activo" && (
+                    <Button size="sm" variant="secondary" onClick={() => void updateVehicleStatus({ data: { id: v.id, status: "pausado" } }).then(reload)}>
+                      Pausar
+                    </Button>
+                  )}
                   {v.status !== "vendido" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={async () => {
-                        await updateVehicleStatus({ data: { id: v.id, status: "vendido" } });
-                        load();
-                      }}
-                    >
-                      Marcar vendido
+                    <Button size="sm" variant="outline" onClick={() => void updateVehicleStatus({ data: { id: v.id, status: "vendido" } }).then(reload)}>
+                      Vendido
                     </Button>
                   )}
                   <Button
                     size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      await deleteMyVehicle({ data: { id: v.id } });
-                      toast.success("Anuncio eliminado.");
-                      load();
+                    variant="danger"
+                    onClick={() => {
+                      void deleteMyVehicle({ data: { id: v.id } })
+                        .then(() => {
+                          toast.success("Anuncio eliminado.");
+                          return reload();
+                        })
+                        .catch((err) => toast.error(err instanceof Error ? err.message : "No se pudo borrar."));
                     }}
                   >
-                    Eliminar
+                    Borrar
                   </Button>
                 </div>
               </li>

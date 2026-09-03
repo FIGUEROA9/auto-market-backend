@@ -1,5 +1,6 @@
 {
   "title": "AutoMarket",
+  "description": "Compra, venta y permuta de vehículos entre personas en Colombia.",
   "card": "custom",
-  "description": "Compra, venta y permuta de vehículos. Marketplace directo entre personas."
+  "color": "e8a54b"
 }

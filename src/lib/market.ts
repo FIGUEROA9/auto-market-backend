@@ -116,13 +116,28 @@ async function ensureProfileRow(userId: string, name?: string, email?: string) {
     select user_id from profiles where user_id = ${userId}
   `;
   if (existing.length) return;
+  let display = name;
+  let mail = email ?? null;
+  if (!display || !mail) {
+    try {
+      const { getSessionUser } = await import("@/lib/auth/verify.server");
+      const session = await getSessionUser();
+      if (session?.id === userId) {
+        mail = mail ?? session.email;
+        display = display ?? (session.email ? session.email.split("@")[0] : "Usuario");
+      }
+    } catch {
+      /* session lookup is best-effort */
+    }
+  }
   const admins = await sql<{ c: number }>`
-    select count(*)::int as c from profiles where role = 'admin'
+    select count(*)::int as c from profiles
+    where role = 'admin' and user_id not like 'seed-%'
   `;
   const role = (admins[0]?.c ?? 0) === 0 ? "admin" : "cliente";
   await sql`
     insert into profiles (user_id, display_name, email, role)
-    values (${userId}, ${name || "Usuario"}, ${email ?? null}, ${role})
+    values (${userId}, ${display || "Usuario"}, ${mail}, ${role})
   `;
 }
 
@@ -154,45 +169,59 @@ const vehicleInput = z.object({
   listingType: z.enum(["venta", "permuta", "ambos"]),
 });
 
+const listFilter = z.object({
+  q: z.string().optional(),
+  brand: z.string().optional(),
+  listingType: z.string().optional(),
+  bodyType: z.string().optional(),
+  city: z.string().optional(),
+  fuel: z.string().optional(),
+  minPrice: z.number().optional(),
+  maxPrice: z.number().optional(),
+  yearMin: z.number().optional(),
+  yearMax: z.number().optional(),
+});
+
 export const listVehicles = createServerFn({ method: "GET" })
-  .validator(
-    z.object({
-      q: z.string().optional(),
-      brand: z.string().optional(),
-      listingType: z.string().optional(),
-      bodyType: z.string().optional(),
-      city: z.string().optional(),
-    }),
-  )
+  .validator(listFilter)
   .handler(async ({ data }) => {
     const sql = await getSql();
-    const rows = await sql<VehicleRow>`
-      select v.*, p.display_name as seller_name
-      from vehicles v
-      left join profiles p on p.user_id = v.user_id
-      where v.status = 'activo'
-      order by v.created_at desc
-    `;
-    let list = rows.map((r) => mapVehicle(r));
-    const q = data.q?.trim().toLowerCase();
+    const where: string[] = ["v.status = 'activo'"];
+    const params: unknown[] = [];
+    const add = (clause: string, value: unknown) => {
+      params.push(value);
+      where.push(clause.replaceAll("?", `$${params.length}`));
+    };
+    const q = data.q?.trim();
     if (q) {
-      list = list.filter(
-        (v) =>
-          v.title.toLowerCase().includes(q) ||
-          v.brand.toLowerCase().includes(q) ||
-          v.model.toLowerCase().includes(q) ||
-          v.city.toLowerCase().includes(q),
+      params.push(`%${q}%`);
+      const i = params.length;
+      where.push(
+        `(v.title ilike $${i} or v.brand ilike $${i} or v.model ilike $${i} or v.city ilike $${i})`,
       );
     }
-    if (data.brand) list = list.filter((v) => v.brand === data.brand);
+    if (data.brand) add("v.brand = ?", data.brand);
+    if (data.bodyType) add("v.body_type = ?", data.bodyType);
+    if (data.city) add("v.city = ?", data.city);
+    if (data.fuel) add("v.fuel = ?", data.fuel);
+    if (data.minPrice != null) add("v.price >= ?", data.minPrice);
+    if (data.maxPrice != null) add("v.price <= ?", data.maxPrice);
+    if (data.yearMin != null) add("v.year >= ?", data.yearMin);
+    if (data.yearMax != null) add("v.year <= ?", data.yearMax);
     if (data.listingType) {
-      list = list.filter(
-        (v) => v.listingType === data.listingType || v.listingType === "ambos",
-      );
+      params.push(data.listingType);
+      const i = params.length;
+      where.push(`(v.listing_type = $${i} or v.listing_type = 'ambos')`);
     }
-    if (data.bodyType) list = list.filter((v) => v.bodyType === data.bodyType);
-    if (data.city) list = list.filter((v) => v.city === data.city);
-    return list;
+    const rows = await sql.query<VehicleRow>(
+      `select v.*, p.display_name as seller_name
+       from vehicles v
+       left join profiles p on p.user_id = v.user_id
+       where ${where.join(" and ")}
+       order by v.created_at desc`,
+      params,
+    );
+    return rows.map((r) => mapVehicle(r));
   });
 
 export const getVehicle = createServerFn({ method: "GET" })
@@ -242,7 +271,15 @@ export const getMyProfile = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await ensureProfileRow(context.userId);
     const sql = await getSql();
-    const rows = await sql<Profile & { user_id: string; display_name: string; created_at: string }>`
+    const rows = await sql<{
+      user_id: string;
+      display_name: string;
+      email: string | null;
+      phone: string | null;
+      city: string | null;
+      role: string;
+      created_at: string;
+    }>`
       select user_id, display_name, email, phone, city, role, created_at
       from profiles where user_id = ${context.userId}
     `;
@@ -345,6 +382,7 @@ export const toggleFavorite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .validator(z.object({ vehicleId: z.number() }))
   .handler(async ({ context, data }) => {
+    await ensureProfileRow(context.userId);
     const sql = await getSql();
     const existing = await sql<{ vehicle_id: number }>`
       select vehicle_id from favorites
@@ -377,6 +415,16 @@ export const listFavorites = createServerFn({ method: "GET" })
       order by f.created_at desc
     `;
     return rows.map((r) => mapVehicle(r, new Set(rows.map((x) => x.id))));
+  });
+
+export const listFavoriteIds = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    const sql = await getSql();
+    const rows = await sql<{ vehicle_id: number }>`
+      select vehicle_id from favorites where user_id = ${context.userId}
+    `;
+    return rows.map((r) => r.vehicle_id);
   });
 
 export const isFavorite = createServerFn({ method: "GET" })
@@ -413,6 +461,13 @@ export const createOffer = createServerFn({ method: "POST" })
     }
     if (vehicle[0].user_id === context.userId) {
       throw new Error("No puedes ofertar sobre tu propio anuncio.");
+    }
+    const listing = vehicle[0].listing_type;
+    if (data.offerType === "compra" && listing === "permuta") {
+      throw new Error("Este anuncio solo acepta permuta.");
+    }
+    if (data.offerType === "permuta" && listing === "venta") {
+      throw new Error("Este anuncio solo está en venta.");
     }
     if (data.offerType === "permuta") {
       if (!data.swapVehicleId) throw new Error("Elige un vehículo para permutar.");
@@ -507,12 +562,16 @@ export const respondOffer = createServerFn({ method: "POST" })
       select o.id, o.vehicle_id
       from offers o
       join vehicles v on v.id = o.vehicle_id
-      where o.id = ${data.id} and v.user_id = ${context.userId}
+      where o.id = ${data.id} and v.user_id = ${context.userId} and o.status = 'pendiente'
     `;
     if (!rows[0]) throw new Error("Oferta no encontrada.");
-    await sql`update offers set status = ${data.status} where id = ${data.id}`;
+    await sql`update offers set status = ${data.status} where id = ${data.id} and status = 'pendiente'`;
     if (data.status === "aceptada") {
       await sql`update vehicles set status = 'vendido' where id = ${rows[0].vehicle_id} and user_id = ${context.userId}`;
+      await sql`
+        update offers set status = 'cerrada'
+        where vehicle_id = ${rows[0].vehicle_id} and id <> ${data.id} and status = 'pendiente'
+      `;
     }
     return { ok: true };
   });
@@ -551,6 +610,9 @@ export const adminStats = createServerFn({ method: "GET" })
     const byType = await sql<{ listing_type: string; c: number }>`
       select listing_type, count(*)::int as c from vehicles group by listing_type
     `;
+    const byCity = await sql<{ city: string; c: number }>`
+      select city, count(*)::int as c from vehicles where status = 'activo' group by city order by c desc
+    `;
     const recentOffers = await sql<OfferRow>`
       select o.*, v.title as vehicle_title, v.image_url as vehicle_image,
              s.title as swap_title, p.display_name as buyer_name
@@ -568,6 +630,7 @@ export const adminStats = createServerFn({ method: "GET" })
       contacts: contacts[0]?.c ?? 0,
       byStatus,
       byType,
+      byCity,
       recentOffers: recentOffers.map(mapOffer),
     };
   });

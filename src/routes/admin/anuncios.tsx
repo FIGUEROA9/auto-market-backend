@@ -5,51 +5,48 @@ import { Button } from "@/components/ui/button";
 import { LISTING_LABEL, STATUS_LABEL, formatCop } from "@/lib/format";
 import { adminListVehicles, adminSetVehicleStatus, type Vehicle } from "@/lib/market";
 
-export const Route = createFileRoute("/admin/anuncios")({ component: AdminAnuncios });
+export const Route = createFileRoute("/admin/anuncios")({ component: Anuncios });
 
-function AdminAnuncios() {
-  const [rows, setRows] = useState<Vehicle[] | null>(null);
+function Anuncios() {
+  const [rows, setRows] = useState<Vehicle[]>([]);
 
-  function load() {
-    adminListVehicles()
-      .then(setRows)
-      .catch(() => setRows([]));
+  async function reload() {
+    setRows(await adminListVehicles());
   }
 
   useEffect(() => {
-    load();
+    reload().catch(() => setRows([]));
   }, []);
 
   return (
     <div>
       <h1 className="font-display text-3xl font-semibold">Anuncios</h1>
-      <p className="mt-1 text-sm text-muted">Modera el inventario publicado.</p>
+      <p className="mt-1 text-sm text-muted">{rows.length} publicados.</p>
       <ul className="mt-6 grid gap-3">
-        {(rows ?? []).map((v) => (
-          <li key={v.id} className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
-            <img src={v.imageUrl} alt="" className="h-20 w-full rounded-md object-cover sm:w-32" />
+        {rows.map((v) => (
+          <li key={v.id} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] sm:flex-row sm:items-center">
+            <img src={v.imageUrl} alt="" className="h-20 w-full rounded-lg object-cover sm:w-32" />
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap gap-2">
-                <Badge>{LISTING_LABEL[v.listingType]}</Badge>
-                <Badge tone={v.status === "activo" ? "success" : "warn"}>{STATUS_LABEL[v.status]}</Badge>
-              </div>
-              <Link to="/vehiculo/$id" params={{ id: String(v.id) }} className="mt-1 block truncate font-medium">
+              <Link to="/vehiculo/$id" params={{ id: String(v.id) }} className="font-medium">
                 {v.title}
               </Link>
-              <p className="text-xs text-muted">
-                {v.sellerName || "Catálogo"} · {formatCop(v.price)}
+              <p className="text-sm text-muted">
+                {v.sellerName} · {v.city} · {formatCop(v.price)}
               </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge tone={v.status === "activo" ? "success" : v.status === "pausado" ? "warn" : "neutral"}>
+                  {STATUS_LABEL[v.status]}
+                </Badge>
+                <Badge>{LISTING_LABEL[v.listingType]}</Badge>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              {(["activo", "pausado", "rechazado", "vendido"] as const).map((s) => (
+              {(["activo", "pausado", "vendido", "rechazado"] as const).map((s) => (
                 <Button
                   key={s}
                   size="sm"
                   variant={v.status === s ? "default" : "secondary"}
-                  onClick={async () => {
-                    await adminSetVehicleStatus({ data: { id: v.id, status: s } });
-                    load();
-                  }}
+                  onClick={() => void adminSetVehicleStatus({ data: { id: v.id, status: s } }).then(reload)}
                 >
                   {STATUS_LABEL[s]}
                 </Button>
