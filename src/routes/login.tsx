@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import { GROK_PROVIDERS, authClient, authEnabled, signIn } from "@/lib/auth/client";
 import { useCurrentUserState } from "@/lib/auth/use-current-user";
 import { SiteShell } from "@/components/site-shell";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/input";
 import { CITIES, DOC_TYPES } from "@/lib/format";
 import { updateMyProfile } from "@/lib/market";
+import { compressImageFile } from "@/lib/images";
 
 export const Route = createFileRoute("/login")({ component: Login });
 
@@ -24,11 +26,31 @@ function Login() {
   const [address, setAddress] = useState("");
   const [documentType, setDocumentType] = useState<"CC" | "CE" | "NIT" | "PA">("CC");
   const [documentNumber, setDocumentNumber] = useState("");
+  
+  // Nuevos estados para la cédula de verificación
+  const [idFrontUrl, setIdFrontUrl] = useState("");
+  const [idBackUrl, setIdBackUrl] = useState("");
+
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   if (!isPending && user) {
     void navigate({ to: "/" });
+  }
+
+  async function handlePickImage(side: "front" | "back", file: File | undefined) {
+    if (!file) return;
+    const toastId = toast.loading("Procesando foto de la cédula...");
+    try {
+      const url = await compressImageFile(file, 1200, 0.7);
+      if (side === "front") setIdFrontUrl(url);
+      else setIdBackUrl(url);
+      toast.dismiss(toastId);
+      toast.success("Foto cargada correctamente.");
+    } catch {
+      toast.dismiss(toastId);
+      toast.error("No se pudo leer la imagen.");
+    }
   }
 
   async function onSubmit(e: FormEvent) {
@@ -52,6 +74,8 @@ function Login() {
               email,
               documentType,
               documentNumber: documentNumber || undefined,
+              idFrontUrl: idFrontUrl || undefined,
+              idBackUrl: idBackUrl || undefined,
             },
           });
         } catch {
@@ -200,8 +224,61 @@ function Login() {
                   autoComplete="street-address"
                 />
               </Field>
+
+              {/* Sección de carga de fotos de la cédula al final del formulario de registro */}
+              <div className="grid gap-2 pt-2 border-t border-border mt-2">
+                <p className="text-xs font-semibold text-fg">Verificación de identidad (Cédula)</p>
+                <p className="text-xs text-muted">Sube las fotos del documento para acelerar la aprobación de tu cuenta.</p>
+                
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  {/* Frente */}
+                  <div className="grid gap-1.5">
+                    <span className="text-xs font-medium text-muted">Frente de la cédula</span>
+                    <label className="cursor-pointer block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => void handlePickImage("front", e.target.files?.[0])}
+                      />
+                      {idFrontUrl ? (
+                        <img src={idFrontUrl} alt="Frente" className="h-28 w-full rounded-md object-cover border border-border" />
+                      ) : (
+                        <div className="h-28 w-full rounded-md bg-bg border border-dashed border-border flex flex-col items-center justify-center text-xs text-muted hover:border-accent p-2 text-center transition-colors">
+                          <span className="font-medium text-fg">Subir foto</span>
+                          <span className="text-[10px] text-subtle mt-0.5">Frente</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+
+                  {/* Reverso */}
+                  <div className="grid gap-1.5">
+                    <span className="text-xs font-medium text-muted">Reverso de la cédula</span>
+                    <label className="cursor-pointer block">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={(e) => void handlePickImage("back", e.target.files?.[0])}
+                      />
+                      {idBackUrl ? (
+                        <img src={idBackUrl} alt="Reverso" className="h-28 w-full rounded-md object-cover border border-border" />
+                      ) : (
+                        <div className="h-28 w-full rounded-md bg-bg border border-dashed border-border flex flex-col items-center justify-center text-xs text-muted hover:border-accent p-2 text-center transition-colors">
+                          <span className="font-medium text-fg">Subir foto</span>
+                          <span className="text-[10px] text-subtle mt-0.5">Reverso</span>
+                        </div>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
             </>
           )}
+
           <Field label="Correo">
             <Input
               type="email"
@@ -232,7 +309,7 @@ function Login() {
           <Link to="/terminos" className="text-muted underline">
             términos
           </Link>
-          . La verificación de identidad se hace después, con fotos de tu cédula.
+          .
         </p>
       </main>
     </SiteShell>

@@ -17,6 +17,7 @@ export const Route = createFileRoute("/perfil")({ component: Perfil });
 
 function Perfil() {
   const { user, isPending } = useCurrentUserState();
+  
   const [profile, setProfile] = useState<Profile | null>(null);
   const [busy, setBusy] = useState(false);
   const [pwdBusy, setPwdBusy] = useState(false);
@@ -27,7 +28,7 @@ function Perfil() {
   useEffect(() => {
     if (isPending || !user) return;
     getMyProfile()
-      .then((p) => {
+      .then((p: any) => {
         setProfile(p);
         setFront(p?.idFrontUrl ?? "");
         setBack(p?.idBackUrl ?? "");
@@ -64,7 +65,7 @@ function Perfil() {
           documentNumber: String(fd.get("documentNumber") || "") || undefined,
         },
       });
-      toast.success("Perfil actualizado.");
+      toast.success("Perfil actualizado con éxito.");
       setProfile(await getMyProfile());
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo guardar.");
@@ -98,11 +99,15 @@ function Perfil() {
 
   async function pickSide(side: "front" | "back", file: File | undefined) {
     if (!file) return;
+    const toastId = toast.loading("Procesando imagen de la cédula...");
     try {
       const url = await compressImageFile(file, 1200, 0.7);
       if (side === "front") setFront(url);
       else setBack(url);
+      toast.dismiss(toastId);
+      toast.success("Foto de cédula cargada correctamente.");
     } catch (err) {
+      toast.dismiss(toastId);
       toast.error(err instanceof Error ? err.message : "No se pudo leer la foto.");
     }
   }
@@ -111,9 +116,15 @@ function Perfil() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     if (!front || !back) {
-      toast.error("Sube el frente y el reverso de tu cédula.");
+      toast.error("Debes subir tanto el frente como el reverso de tu cédula.");
       return;
     }
+    const documentNumber = String(fd.get("documentNumber") || profile?.documentNumber || "");
+    if (!documentNumber) {
+      toast.error("Por favor ingresa tu número de documento en tus datos personales antes de verificar.");
+      return;
+    }
+
     setVerBusy(true);
     try {
       await submitVerification({
@@ -121,13 +132,13 @@ function Perfil() {
           idFrontUrl: front,
           idBackUrl: back,
           documentType: String(fd.get("documentType") || "CC") as "CC" | "CE" | "NIT" | "PA",
-          documentNumber: String(fd.get("documentNumber")),
+          documentNumber: documentNumber,
         },
       });
-      toast.success("Solicitud enviada. Un administrador la revisará.");
+      toast.success("Documentos de verificación enviados. Un administrador los revisará pronto.");
       setProfile(await getMyProfile());
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "No se pudo enviar.");
+      toast.error(err instanceof Error ? err.message : "No se pudo enviar la verificación.");
     } finally {
       setVerBusy(false);
     }
@@ -140,13 +151,13 @@ function Perfil() {
       <main className="mx-auto max-w-lg px-4 py-10">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-subtle">Cuenta</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <h1 className="font-display text-4xl font-semibold">Perfil</h1>
+          <h1 className="font-display text-4xl font-semibold">Perfil y Verificación</h1>
           {profile?.verificationStatus === "verificado" && <VerifiedBadge />}
         </div>
         <p className="mt-2 text-sm text-muted">
           {profile?.role === "admin"
             ? "Eres administrador de AutoMarket."
-            : "Completa tus datos. La verificación te da un sello visible en anuncios y perfil."}
+            : "Completa tus datos personales y sube las fotos de tu cédula para validar tu cuenta."}
         </p>
         {disabled && (
           <p className="mt-4 rounded-md bg-danger/15 px-3 py-3 text-sm text-danger">
@@ -166,9 +177,11 @@ function Perfil() {
             </Link>
           )}
         </div>
+
         {profile && (
           <>
             <form onSubmit={onSubmit} className="mt-8 grid gap-4">
+              <h2 className="font-display text-xl font-semibold">1. Datos Personales</h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Nombres">
                   <Input
@@ -221,36 +234,17 @@ function Perfil() {
                   </Select>
                 </Field>
                 <Field label="Número de documento">
-                  <Input name="documentNumber" defaultValue={profile.documentNumber ?? ""} />
+                  <Input name="documentNumber" defaultValue={profile.documentNumber ?? ""} required />
                 </Field>
               </div>
               <Button type="submit" disabled={busy || disabled}>
-                {busy ? "Guardando…" : "Guardar datos"}
+                {busy ? "Guardando…" : "Guardar datos personales"}
               </Button>
             </form>
 
             <section className="mt-12">
-              <h2 className="font-display text-2xl font-semibold">Contraseña</h2>
-              <p className="mt-1 text-sm text-muted">Solo tú puedes cambiarla. El administrador no la ve ni la edita.</p>
-              <form onSubmit={onPassword} className="mt-4 grid gap-3">
-                <Field label="Contraseña actual">
-                  <Input name="currentPassword" type="password" required minLength={8} autoComplete="current-password" />
-                </Field>
-                <Field label="Nueva contraseña">
-                  <Input name="newPassword" type="password" required minLength={8} autoComplete="new-password" />
-                </Field>
-                <Field label="Confirmar nueva">
-                  <Input name="confirmPassword" type="password" required minLength={8} autoComplete="new-password" />
-                </Field>
-                <Button type="submit" variant="secondary" disabled={pwdBusy || disabled}>
-                  {pwdBusy ? "Actualizando…" : "Cambiar contraseña"}
-                </Button>
-              </form>
-            </section>
-
-            <section className="mt-12">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="font-display text-2xl font-semibold">Verificación</h2>
+                <h2 className="font-display text-2xl font-semibold">2. Verificación de Identidad (Cédula)</h2>
                 <Badge
                   tone={
                     profile.verificationStatus === "verificado"
@@ -266,8 +260,7 @@ function Perfil() {
                 </Badge>
               </div>
               <p className="mt-2 text-sm leading-relaxed text-muted">
-                Sube el frente y el reverso de tu cédula. Un administrador revisa las fotos y,
-                si aprueba, tus próximos anuncios salen publicados de inmediato.
+                Sube las fotos del frente y el reverso de tu documento de identidad para completar la verificación de tu cuenta en la plataforma.
               </p>
               {profile.verificationNote && (
                 <p className="mt-3 rounded-md bg-elevated px-3 py-2 text-sm text-muted">
@@ -278,33 +271,67 @@ function Perfil() {
                 <form onSubmit={sendVerification} className="mt-4 grid gap-4">
                   <input type="hidden" name="documentType" defaultValue={profile.documentType ?? "CC"} />
                   <input type="hidden" name="documentNumber" defaultValue={profile.documentNumber ?? ""} />
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="grid gap-2 text-sm">
-                      <span className="font-medium text-muted">Frente de la cédula</span>
+                  
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2 text-sm rounded-xl border border-border p-4 bg-surface/50">
+                      <span className="font-semibold text-foreground">Frente de la cédula</span>
                       <input
                         type="file"
                         accept="image/*"
-                        className="text-xs text-muted"
+                        className="text-xs text-muted cursor-pointer"
                         onChange={(e) => void pickSide("front", e.target.files?.[0])}
                       />
-                      {front && <img src={front} alt="Frente" className="h-28 w-full rounded-md object-cover" />}
-                    </label>
-                    <label className="grid gap-2 text-sm">
-                      <span className="font-medium text-muted">Reverso de la cédula</span>
+                      {front ? (
+                        <img src={front} alt="Frente de cédula" className="h-36 w-full rounded-md object-cover mt-2 border border-border" />
+                      ) : (
+                        <div className="h-36 w-full rounded-md bg-surface border border-dashed border-border flex items-center justify-center text-xs text-muted">
+                          Sin imagen frontal
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid gap-2 text-sm rounded-xl border border-border p-4 bg-surface/50">
+                      <span className="font-semibold text-foreground">Reverso de la cédula</span>
                       <input
                         type="file"
                         accept="image/*"
-                        className="text-xs text-muted"
+                        className="text-xs text-muted cursor-pointer"
                         onChange={(e) => void pickSide("back", e.target.files?.[0])}
                       />
-                      {back && <img src={back} alt="Reverso" className="h-28 w-full rounded-md object-cover" />}
-                    </label>
+                      {back ? (
+                        <img src={back} alt="Reverso de cédula" className="h-36 w-full rounded-md object-cover mt-2 border border-border" />
+                      ) : (
+                        <div className="h-36 w-full rounded-md bg-surface border border-dashed border-border flex items-center justify-center text-xs text-muted">
+                          Sin imagen posterior
+                        </div>
+                      )}
+                    </div>
                   </div>
+
                   <Button type="submit" variant="secondary" disabled={verBusy || disabled}>
-                    {verBusy ? "Enviando…" : "Enviar a revisión"}
+                    {verBusy ? "Enviando documentos…" : "Enviar cédula a revisión"}
                   </Button>
                 </form>
               )}
+            </section>
+
+            <section className="mt-12">
+              <h2 className="font-display text-2xl font-semibold">Seguridad y Contraseña</h2>
+              <p className="mt-1 text-sm text-muted">Actualiza tu contraseña de acceso.</p>
+              <form onSubmit={onPassword} className="mt-4 grid gap-3">
+                <Field label="Contraseña actual">
+                  <Input name="currentPassword" type="password" required minLength={8} autoComplete="current-password" />
+                </Field>
+                <Field label="Nueva contraseña">
+                  <Input name="newPassword" type="password" required minLength={8} autoComplete="new-password" />
+                </Field>
+                <Field label="Confirmar nueva">
+                  <Input name="confirmPassword" type="password" required minLength={8} autoComplete="new-password" />
+                </Field>
+                <Button type="submit" variant="outline" disabled={pwdBusy || disabled}>
+                  {pwdBusy ? "Actualizando…" : "Cambiar contraseña"}
+                </Button>
+              </form>
             </section>
           </>
         )}

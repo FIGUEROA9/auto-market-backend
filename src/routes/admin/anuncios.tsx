@@ -29,15 +29,35 @@ function Anuncios() {
       </p>
       <ul className="mt-6 grid gap-3">
         {rows.map((v) => (
-          <li key={v.id} className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] sm:flex-row sm:items-center">
+          <li
+            key={v.id}
+            className="flex flex-col gap-3 rounded-xl bg-surface p-4 shadow-[var(--shadow-border)] sm:flex-row sm:items-center"
+          >
             <img src={v.imageUrl} alt="" className="h-20 w-full rounded-lg object-cover sm:w-32" />
             <div className="min-w-0 flex-1">
               <Link to="/vehiculo/$id" params={{ id: String(v.id) }} className="font-medium">
                 {v.title}
               </Link>
               <p className="text-sm text-muted">
-                {v.sellerName} · {v.city} · {formatCop(v.price)}
+                {v.city} · {formatCop(v.price)}
               </p>
+
+              <div className="mt-3 rounded-lg bg-bg px-3 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-subtle">
+                  Propietario
+                </p>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-medium">{v.sellerName ?? "Usuario"}</p>
+                  {v.sellerVerified ? <VerifiedBadge /> : null}
+                </div>
+                {v.sellerEmail ? (
+                  <p className="truncate text-xs text-muted">{v.sellerEmail}</p>
+                ) : null}
+                {v.sellerWhatsapp || v.sellerPhone ? (
+                  <p className="text-xs text-muted">{v.sellerWhatsapp || v.sellerPhone}</p>
+                ) : null}
+              </div>
+
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge
                   tone={
@@ -51,14 +71,15 @@ function Anuncios() {
                   {STATUS_LABEL[v.status]}
                 </Badge>
                 <Badge>{LISTING_LABEL[v.listingType]}</Badge>
-                {v.sellerVerified && <VerifiedBadge />}
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               {v.status === "pendiente_revision" && (
                 <Button
                   size="sm"
-                  onClick={() => void adminSetVehicleStatus({ data: { id: v.id, status: "activo" } }).then(reload)}
+                  onClick={() =>
+                    void adminSetVehicleStatus({ data: { id: v.id, status: "activo" } }).then(reload)
+                  }
                 >
                   Aprobar
                 </Button>
@@ -68,7 +89,9 @@ function Anuncios() {
                   key={s}
                   size="sm"
                   variant={v.status === s ? "default" : "secondary"}
-                  onClick={() => void adminSetVehicleStatus({ data: { id: v.id, status: s } }).then(reload)}
+                  onClick={() =>
+                    void adminSetVehicleStatus({ data: { id: v.id, status: s } }).then(reload)
+                  }
                 >
                   {STATUS_LABEL[s]}
                 </Button>
